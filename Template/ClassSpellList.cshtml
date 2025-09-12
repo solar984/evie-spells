@@ -1,0 +1,21 @@
+﻿@using RazorLight
+@using System.Globalization
+@inherits TemplatePage<Evie.Template.ClassSpellListModel>
+@model Evie.Template.ClassSpellListModel
+@{
+	Layout = "Layout.cshtml";
+	Model.PageTitle = String.Format(CultureInfo.InvariantCulture, "{0} Spell List", Model.ClassName);
+}
+<table width="100%" class="header"><tr><td><h2>@(Model.ClassName)</h2></td></tr></table>
+<br />
+<table>
+	@foreach (var group in Model.Groups)
+	{
+		<tr><td>&nbsp;</td></tr>
+		<tr><td class="header">@(group.Name)</td></tr>
+		@foreach (var spell in group.Spells)
+		{
+			<tr><td><a href="@(spell.id).html">@(spell.name)</a></td></tr>
+		}
+	}
+</table>

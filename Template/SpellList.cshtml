@@ -1,0 +1,12 @@
+﻿@using RazorLight
+@inherits TemplatePage<Evie.Template.SpellListModel>
+@model Evie.Template.SpellListModel
+@{
+	Layout = "Layout.cshtml";
+	Model.PageTitle = "Alphabetical Index";
+}
+@foreach (var s in Model.Spells)
+{
+	<a href="@(s.id).html">@(s.name)</a>
+	<br>
+}

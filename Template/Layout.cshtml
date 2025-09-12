@@ -1,0 +1,144 @@
+﻿@using RazorLight
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>@((String.IsNullOrWhiteSpace(Model.PageTitle) ? "" : (Model.PageTitle + " - ")) + "EQ Spell Data")</title>
+	<link rel="shortcut icon" href="favicon.png" type="image/png">
+	<meta charset="UTF-8">
+	<meta name="description" content="Spell data for EQ Titanium client">
+	<meta name="viewport" content="width=500">
+	<style>
+		:root {
+			--bg-color: #ffffff;
+			--text-color: #000000;
+			--sidebar-bg: lightgray;
+			--link-color: blue;
+		}
+
+		body.dark-mode {
+			--bg-color: #121212;
+			--text-color: #e0e0e0;
+			--sidebar-bg: #1f1f1f;
+			--link-color: #66bb6a;
+		}
+
+		body {
+			background-color: var(--bg-color);
+			color: var(--text-color);
+			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+			margin: 0;
+			padding: 10px;
+			transition: background-color 0.3s, color 0.3s;
+		}
+
+		a {
+			color: var(--link-color);
+		}
+
+			a:hover {
+				color: #a5d6a7;
+				text-decoration: underline;
+			}
+
+		td.sidebar {
+			vertical-align: top;
+			padding: 10px;
+			background-color: var(--sidebar-bg);
+			width: 10%;
+			min-width: 150px;
+		}
+
+		input[type="text"] {
+			background: #1f1f1f;
+			color: #fff;
+			border: 1px solid #555;
+			padding: 4px 6px;
+			border-radius: 3px;
+			margin: 6px 0;
+		}
+
+			input[type="text"]:focus {
+				outline: none;
+				border-color: #90caf9;
+				box-shadow: 0 0 3px #90caf9;
+			}
+
+		input[type="submit"] {
+			background: #2a3b55;
+			border: 1px solid #555;
+			color: #fff;
+			padding: 2px 6px;
+			cursor: pointer;
+		}
+
+			input[type="submit"]:hover {
+				background: #3c4f72;
+			}
+
+		.header,
+		.label {
+			background: #2a3b55;
+			color: #fff;
+			font-weight: 500;
+			padding: 0px 6px;
+		}
+
+		.label {
+			white-space: nowrap;
+		}
+
+		tt {
+			font-family: monospace;
+		}
+	</style>
+	@RenderSection("Styles", required: false)
+</head>
+<body class="dark-mode">
+	<table width="100%">
+		<tr>
+			<td class="sidebar">
+				<a href="/">EQ Spell Data</a><br>
+				<br>
+				By Class:<br>
+				<a href="index_WAR.html">Warrior</a><br>
+				<a href="index_CLR.html">Cleric</a><br>
+				<a href="index_PAL.html">Paladin</a><br>
+				<a href="index_RNG.html">Ranger</a><br>
+				<a href="index_SHD.html">ShadowKnight</a><br>
+				<a href="index_DRU.html">Druid</a><br>
+				<a href="index_MNK.html">Monk</a><br>
+				<a href="index_BRD.html">Bard</a><br>
+				<a href="index_ROG.html">Rogue</a><br>
+				<a href="index_SHM.html">Shaman</a><br>
+				<a href="index_NEC.html">Necromancer</a><br>
+				<a href="index_WIZ.html">Wizard</a><br>
+				<a href="index_MAG.html">Magician</a><br>
+				<a href="index_ENC.html">Enchanter</a><br>
+				<a href="index_BST.html">Beastlord</a><br>
+				<a href="index_BER.html">Berserker</a><br>
+				<br>
+				<a href="index_alpha.html">Full List</a> (large)<br>
+				<br>
+				<form method="GET" action="search.html">
+					<label>
+						Search by spell name:
+						<input type="text" name="searchstring" size="20" autofocus="autofocus">
+					</label>
+					<input type=submit value="Search"><br><br>
+				</form>
+			</td>
+			<td>
+				@RenderBody()
+			</td>
+		</tr>
+	</table>
+	<br>
+	<br>
+	<br>
+	This website is based on
+	<a href="https://lucy.alkabor.com/" target="_blank">lucy.alkabor.com</a> by Dwin.  This version is maintained by
+	<a href="mailto:solar@heliacal.net">solar</a> of
+	<a href="https://www.takproject.net/" target="_blank">The Al`Kabor Project</a>.
+	@RenderSection("Scripts", required: false)
+</body>
+</html>

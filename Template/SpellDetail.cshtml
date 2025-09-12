@@ -1,0 +1,80 @@
+﻿@using RazorLight
+@using System.Globalization
+@inherits TemplatePage<Evie.Template.SpellDetailModel>
+@model Evie.Template.SpellDetailModel
+@{
+	Layout = "Layout.cshtml";
+}
+@if (Model.spell != null)
+{
+	var s = Model.spell;
+	Model.PageTitle = s.name;
+	<table width="100%" class="header"><tr><td><h2>@(s.name)</h2></td><td align=right>@*<a href="stacking_@(s.id).html">Stacking Info</a>*@</td></tr></table>
+	<br>
+	<br>
+	<table>
+		<tr><td class="header">Slot</td><td class="header">Description</td><td class="header">effect base1/base2/max/calc</td></tr>
+		@for (int i = 0; i < 12; i++)
+		{
+			if (!Model.IsBlankSpellEffect(i))
+			{
+				<tr><td class="label">@(i + 1)</td><td></td><td>@(s.effect[i]) @(s.base1[i])/@(s.base2[i])/@(s.max[i])/@(s.calc[i])</td></tr>
+			}
+		}
+	</table>
+	<br>
+	<br>
+	<table>
+		<tr><td class="label">ID</td><td>@(s.id)</td></tr>
+		<tr><td class="label">Spell Type</td><td>@(Model.FormatDetrimental(s.goodEffect))</td></tr>
+		<tr><td class="label">Target Type</td><td>@(s.targettype)</td></tr>
+		<tr><td class="label">Mana</td><td>@(s.mana)</td></tr>
+		<tr><td class="label">Range to Target</td><td>@(s.range)</td></tr>
+		<tr><td class="label">AE Radius</td><td>@(s.aoerange)</td></tr>
+		<tr><td class="label">Casting Time</td><td>@(Model.FormatTimeString(s.cast_time))</td></tr>
+		<tr><td class="label">Recovery Time</td><td>@(Model.FormatTimeString(s.recovery_time))</td></tr>
+		<tr><td class="label">Recast Time</td><td>@(Model.FormatTimeString(s.recast_time))</td></tr>
+		<tr><td class="label">Fizzle Adj</td><td>@(s.basediff)</td></tr>
+
+		@*
+		<tr><td class="label">Duration</td><td>1 minute</td></tr>
+		<tr><td class="label">Skill</td><td>Unknown (52)</td></tr>
+		<tr><td class="label">Resist</td><td>Magic (-300)</td></tr>
+		*@
+
+		<tr><td class="label">Classes</td><td>@(Model.Classes)</td></tr>
+	</table>
+	<br>
+	<br>
+	<table>
+		@if (!String.IsNullOrEmpty(s.you_cast))
+		{
+			<tr><td class="label">You begin to cast</td><td>@(s.you_cast)</td></tr>
+		}
+		@if (!String.IsNullOrEmpty(s.other_casts))
+		{
+			<tr><td class="label">Other begins to cast</td><td>@(s.other_casts)</td></tr>
+		}
+		@if (!String.IsNullOrEmpty(s.cast_on_you))
+		{
+			<tr><td class="label">Cast on you</td><td>@(s.cast_on_you)</td></tr>
+		}
+		@if (!String.IsNullOrEmpty(s.cast_on_other))
+		{
+			<tr><td class="label">Cast on other</td><td>@(s.cast_on_other)</td></tr>
+		}
+		@if (!String.IsNullOrEmpty(s.spell_fades))
+		{
+			<tr><td class="label">Wears off</td><td>@(s.spell_fades)</td></tr>
+		}
+	</table>
+	<br>
+	<br>
+	<a href="http://everquest.allakhazam.com/db/spell.html?spell=@(s.id)" target="_blank">Allakhazam's page for this spell</a>
+	<br>
+	<a href="http://lucy.allakhazam.com/spell.html?id=@(s.id)" target="_blank">EQPC Lucy's page for this spell</a>
+}
+else
+{
+	<strong>Spell @(Model.spell_id) not found</strong>
+}

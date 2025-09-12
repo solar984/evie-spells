@@ -1,0 +1,35 @@
+﻿@using RazorLight
+@inherits TemplatePage<Evie.Template.SearchModel>
+@model Evie.Template.SearchModel
+@{
+	Layout = "Layout.cshtml";
+	Model.PageTitle = "Search";
+}
+@section Scripts
+{
+	<script>
+		var names = @Raw(System.Text.Json.JsonSerializer.Serialize(Model.Names));
+
+		window.onload = function(e){
+			var searchstring = new URL(window.location.href).searchParams.get("searchstring");
+			var re = new RegExp(searchstring, 'i');
+			var matches = names.filter(n => n[1].match(re));
+			if (matches.length == 0)
+			{
+				console.log ("0 matches");
+				document.getElementById("searchResults").innerHTML = "No results found.<br>";
+			}
+			else if (matches.length == 1)
+			{
+				window.location.replace(matches[0][0] + ".html");
+			}
+			else
+			{
+				console.log ("2+ matches");
+				document.getElementById("searchResults").innerHTML = matches.map (m => "<a href=\"" + m[0] + ".html\">" + m[1] + "</a><br>").join('');
+			}
+		}
+	</script>
+}
+<div id="searchResults">
+</div>
