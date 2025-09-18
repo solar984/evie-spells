@@ -76,16 +76,34 @@
 			}
 
 		.header,
+		.label,
+		.value,
+		.effect-header,
+		.effect-label {
+			padding: 1px 40px 1px 2px;
+		}
+
+		.effect-header,
+		.effect-label,
+		.header,
 		.label {
 			background: #2a3b55;
 			color: #fff;
 			font-weight: 500;
-			padding: 0px 6px;
 		}
 
 		.label {
 			white-space: nowrap;
 		}
+
+		.effect-header,
+		.effect-label {
+			white-space: nowrap;
+			width: 40px;
+			max-width: 50px;
+			padding: 1px;
+		}
+
 
 		tt {
 			font-family: monospace;
@@ -97,7 +115,7 @@
 	<table width="100%">
 		<tr>
 			<td class="sidebar">
-				<a href="/">EQ Spell Data</a><br>
+				<a href="index.html">EQ Spell Data</a><br>
 				<br>
 				By Class:<br>
 				<a href="index_WAR.html">Warrior</a><br>
@@ -122,7 +140,7 @@
 				<form method="GET" action="search.html">
 					<label>
 						Search by spell name:
-						<input type="text" name="searchstring" size="20" autofocus="autofocus">
+						<input type="text" name="searchstring" size="20">
 					</label>
 					<input type=submit value="Search"><br><br>
 				</form>

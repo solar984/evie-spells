@@ -13,7 +13,7 @@ namespace Evie.Titanium
         int fieldCount = 0;
 
         #region ReadSpellFileRecords
-        public SpellFileRecord[] ReadSpellFileRecords(string path)
+        public EQSpell[] ReadSpellFileRecords(string path)
         {
             fieldCount = 0;
             // set up property map to set each field by its ordinal position in MapSpellRecord
@@ -28,7 +28,7 @@ namespace Evie.Titanium
                 }
             }
 
-            List<SpellFileRecord> lines = new List<SpellFileRecord>();
+            List<EQSpell> lines = new List<EQSpell>();
             using (FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 using (StreamReader sr = new StreamReader(fs))
@@ -66,9 +66,9 @@ namespace Evie.Titanium
         #endregion
 
         #region MapSpellRecord
-        public SpellFileRecord MapSpellRecord(string[] fields)
+        public EQSpell MapSpellRecord(string[] fields)
         {
-            SpellFileRecord spell = new SpellFileRecord();
+            EQSpell spell = new EQSpell();
 
             for (int i = 0; i < fields.Length; i++)
             {

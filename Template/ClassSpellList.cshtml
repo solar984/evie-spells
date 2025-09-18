@@ -4,7 +4,7 @@
 @model Evie.Template.ClassSpellListModel
 @{
 	Layout = "Layout.cshtml";
-	Model.PageTitle = String.Format(CultureInfo.InvariantCulture, "{0} Spell List", Model.ClassName);
+	Model.PageTitle = String.Format("{0} Spell List", Model.ClassName);
 }
 <table width="100%" class="header"><tr><td><h2>@(Model.ClassName)</h2></td></tr></table>
 <br />

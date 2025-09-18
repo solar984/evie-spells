@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Evie.Template
 {
@@ -7,9 +8,9 @@ namespace Evie.Template
         public SearchModel(TemplateRenderContext context) : base(context)
         {
             List<string[]> names = new List<string[]>();
-            foreach(var spell in context.SpellFileRecords)
+            foreach (var spell in context.SpellFileRecords)
             {
-                if (!string.IsNullOrWhiteSpace(spell.name))
+                if (!String.IsNullOrWhiteSpace(spell.name))
                 {
                     List<string> s = new List<string>();
                     s.Add(spell.id);

@@ -1,4 +1,5 @@
-﻿@using RazorLight
+﻿@using Evie
+@using RazorLight
 @using System.Globalization
 @inherits TemplatePage<Evie.Template.SpellDetailModel>
 @model Evie.Template.SpellDetailModel
@@ -12,38 +13,47 @@
 	<table width="100%" class="header"><tr><td><h2>@(s.name)</h2></td><td align=right>@*<a href="stacking_@(s.id).html">Stacking Info</a>*@</td></tr></table>
 	<br>
 	<br>
-	<table>
-		<tr><td class="header">Slot</td><td class="header">Description</td><td class="header">effect base1/base2/max/calc</td></tr>
+	<table width="60%">
+		<tr><td class="effect-header">Slot</td><td class="header">Description</td><td class="header">effect base1/base2/max/calc</td></tr>
 		@for (int i = 0; i < 12; i++)
 		{
-			if (!Model.IsBlankSpellEffect(i))
+			if (!s.IsBlankSpellEffect(i))
 			{
-				<tr><td class="label">@(i + 1)</td><td></td><td>@(s.effect[i]) @(s.base1[i])/@(s.base2[i])/@(s.max[i])/@(s.calc[i])</td></tr>
+				<tr><td class="effect-label">@(i + 1)</td><td class="value">@Raw(Model.FormatEffectDescription(i))</td><td class="value">@(Model.FormatEffectValues(i))</td></tr>
 			}
 		}
 	</table>
 	<br>
 	<br>
 	<table>
-		<tr><td class="label">ID</td><td>@(s.id)</td></tr>
-		<tr><td class="label">Spell Type</td><td>@(Model.FormatDetrimental(s.goodEffect))</td></tr>
-		<tr><td class="label">Target Type</td><td>@(s.targettype)</td></tr>
-		<tr><td class="label">Mana</td><td>@(s.mana)</td></tr>
-		<tr><td class="label">Range to Target</td><td>@(s.range)</td></tr>
-		<tr><td class="label">AE Radius</td><td>@(s.aoerange)</td></tr>
-		<tr><td class="label">Casting Time</td><td>@(Model.FormatTimeString(s.cast_time))</td></tr>
-		<tr><td class="label">Recovery Time</td><td>@(Model.FormatTimeString(s.recovery_time))</td></tr>
-		<tr><td class="label">Recast Time</td><td>@(Model.FormatTimeString(s.recast_time))</td></tr>
-		<tr><td class="label">Fizzle Adj</td><td>@(s.basediff)</td></tr>
-
-		@*
-		<tr><td class="label">Duration</td><td>1 minute</td></tr>
-		<tr><td class="label">Skill</td><td>Unknown (52)</td></tr>
-		<tr><td class="label">Resist</td><td>Magic (-300)</td></tr>
-		*@
-
-		<tr><td class="label">Classes</td><td>@(Model.Classes)</td></tr>
+		<tr><td class="label">ID</td><td class="value">@(Model.FormatInt(s.id))</td></tr>
+		<tr><td class="label">Spell Type</td><td class="value">@(Model.FormatDetrimental())</td></tr>
+		<tr><td class="label">Target Type</td><td class="value">@(Model.FormatTargetType())</td></tr>
+		<tr><td class="label">Mana</td><td class="value">@(Model.FormatInt(s.mana))</td></tr>
+		<tr><td class="label">Range to Target</td><td class="value">@(Model.FormatInt(s.range))</td></tr>
+		<tr><td class="label">AE Radius</td><td class="value">@(Model.FormatInt(s.aoerange))</td></tr>
+		<tr><td class="label">Casting Time</td><td class="value">@(Model.FormatCastTime())</td></tr>
+		<tr><td class="label">Recovery Time</td><td class="value">@(Model.FormatTimeString(s.recovery_time))</td></tr>
+		<tr><td class="label">Recast Time</td><td class="value">@(Model.FormatTimeString(s.recast_time))</td></tr>
+		@if (EQSpell.ConvertToInt32(s.basediff) != 0)
+		{
+			<tr><td class="label">Fizzle Adj</td><td>@(s.basediff)</td></tr>
+		}
+		@if (s.IsBuff())
+		{
+			<tr><td class="label">Duration</td><td class="value">@(Model.FormatBuffDuration())</td></tr>
+			<tr><td class="label">Duration Calc</td><td class="value">@(Model.FormatBuffDurationCalc())</td></tr>
+		}
+		<tr><td class="label">Resist</td><td class="value">@(s.resisttype) (@(s.ResistDiff))</td></tr>
+		<tr><td class="label">Skill</td><td class="value">@(s.skill)</td></tr>
+		<tr><td class="label">Classes</td><td class="value">@(Model.FormatClasses())</td></tr>
 	</table>
+	<br />
+	<br />
+	if (s.IsBuff())
+	{
+
+	}
 	<br>
 	<br>
 	<table>

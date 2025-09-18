@@ -42,7 +42,7 @@ namespace Evie
                 (
                     "ClassSpellList.cshtml",
                     new ClassSpellListModel(context, eqclass.ShortName),
-                    String.Format(CultureInfo.InvariantCulture, "index_{0}.html", eqclass.ShortName)
+                    String.Format("index_{0}.html", eqclass.ShortName)
                 );
             }
 
@@ -57,7 +57,7 @@ namespace Evie
             // spell detail - XXXX.html
             foreach (var spell in context.SpellFileRecords)
             {
-                int spell_id = Convert.ToInt32(spell.id, CultureInfo.InvariantCulture);
+                int spell_id = EQSpell.ConvertToInt32(spell.id);
                 if (spell_id % 100 == 0)
                     Console.Write(".");
                 try
@@ -66,7 +66,7 @@ namespace Evie
                     (
                         "SpellDetail.cshtml",
                         new SpellDetailModel(context, spell_id),
-                        String.Format(CultureInfo.InvariantCulture, "{0}.html", spell_id)
+                        String.Format("{0}.html", spell_id)
                     );
                 }
                 catch
@@ -115,6 +115,6 @@ namespace Evie
 
     public class TemplateRenderContext
     {
-        public SpellFileRecord[] SpellFileRecords { get; set; }
+        public EQSpell[] SpellFileRecords { get; set; }
     }
 }

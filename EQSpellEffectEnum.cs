@@ -1,6 +1,6 @@
 ﻿namespace Evie
 {
-    public enum EQSpellEffect : int
+    public enum EQSpellEffectEnum : int
     {
         CurrentHP = 0, // implemented - Heals and nukes, repeates every tic if in a buff
         ArmorClass = 1, // implemented
