@@ -28,13 +28,25 @@
 	<table>
 		<tr><td class="label">ID</td><td class="value">@(Model.FormatInt(s.id))</td></tr>
 		<tr><td class="label">Spell Type</td><td class="value">@(Model.FormatDetrimental())</td></tr>
-		<tr><td class="label">Target Type</td><td class="value">@(Model.FormatTargetType())</td></tr>
 		<tr><td class="label">Mana</td><td class="value">@(Model.FormatInt(s.mana))</td></tr>
-		<tr><td class="label">Range to Target</td><td class="value">@(Model.FormatInt(s.range))</td></tr>
-		<tr><td class="label">AE Radius</td><td class="value">@(Model.FormatInt(s.aoerange))</td></tr>
+		<tr><td class="label">Target Type</td><td class="value">@(Model.FormatTargetType())</td></tr>
+		@if (s.NeedsTargetInRange())
+		{
+			<tr><td class="label">Range to Target</td><td class="value">@(Model.FormatInt(s.range))</td></tr>
+		}
+		@if (s.IsAreaEffectTargetType())
+		{
+			<tr><td class="label">AE Radius</td><td class="value">@(Model.FormatInt(s.aoerange))</td></tr>
+		}
 		<tr><td class="label">Casting Time</td><td class="value">@(Model.FormatCastTime())</td></tr>
-		<tr><td class="label">Recovery Time</td><td class="value">@(Model.FormatTimeString(s.recovery_time))</td></tr>
-		<tr><td class="label">Recast Time</td><td class="value">@(Model.FormatTimeString(s.recast_time))</td></tr>
+		@if (EQSpell.ConvertToInt32(s.recovery_time) != 0)
+		{
+			<tr><td class="label">Recovery Time</td><td class="value">@(Model.FormatTimeString(s.recovery_time))</td></tr>
+		}
+		@if (EQSpell.ConvertToInt32(s.recast_time) != 0)
+		{
+			<tr><td class="label">Recast Time</td><td class="value">@(Model.FormatTimeString(s.recast_time))</td></tr>
+		}
 		@if (EQSpell.ConvertToInt32(s.basediff) != 0)
 		{
 			<tr><td class="label">Fizzle Adj</td><td>@(s.basediff)</td></tr>
@@ -44,7 +56,10 @@
 			<tr><td class="label">Duration</td><td class="value">@(Model.FormatBuffDuration())</td></tr>
 			<tr><td class="label">Duration Calc</td><td class="value">@(Model.FormatBuffDurationCalc())</td></tr>
 		}
-		<tr><td class="label">Resist</td><td class="value">@(s.resisttype) (@(s.ResistDiff))</td></tr>
+		@if (s.IsDetrimental())
+		{
+			<tr><td class="label">Resist</td><td class="value">@(Model.FormatResist())</td></tr>
+		}
 		<tr><td class="label">Skill</td><td class="value">@(s.skill)</td></tr>
 		<tr><td class="label">Classes</td><td class="value">@(Model.FormatClasses())</td></tr>
 	</table>

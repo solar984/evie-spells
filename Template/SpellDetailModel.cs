@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -150,7 +151,21 @@ namespace Evie.Template
         public string FormatTargetType()
         {
             int val = EQSpell.ConvertToInt32(spell.targettype);
-            return String.Format("{0}({1})", EQTargetType.GetName(val), val);
+            List<string> targetNotes = new List<string>();
+            if (EQTargetType.NeedsTargetInRange(val))
+            {
+                targetNotes.Add("checks range to target");
+            }
+            else
+            {
+                targetNotes.Add("doesn't use target");
+            }
+            if (EQTargetType.IsAreaEffectTargetType(val))
+            {
+                targetNotes.Add("uses AE Radius");
+            }
+            string targetNotesString = String.Format(" ({0})", String.Join(", ", targetNotes));
+            return String.Format("{0}({1}){2}", EQTargetType.GetName(val), val, targetNotesString);
         }
 
         public string FormatCastTime()
@@ -397,6 +412,45 @@ namespace Evie.Template
             return String.Format("{0}({1}) {2}/{3}/{4}/{5}", Enum.GetName(typeof(EQSpellEffectEnum), spell.effect[slot]), spell.effect[slot], spell.base1[slot], spell.base2[slot], spell.max[slot], spell.calc[slot]);
         }
 
+        public string FormatResist()
+        {
+            if (spell.IsDetrimental())
+            {
+                if (!spell.IsResistable())
+                    return "Unresistable";
+
+                int resisttype = EQSpell.ConvertToInt32(spell.resisttype);
+                int resistval = EQSpell.ConvertToInt32(spell.ResistDiff);
+                string resistName = resisttype.ToString();
+
+                switch (resisttype)
+                {
+                    case (int)EQResistTypeEnum.RESIST_NONE:
+                        resistName = "None"; break;
+                    case (int)EQResistTypeEnum.RESIST_MAGIC:
+                        resistName = "Magic"; break;
+                    case (int)EQResistTypeEnum.RESIST_FIRE:
+                        resistName = "Fire"; break;
+                    case (int)EQResistTypeEnum.RESIST_COLD:
+                        resistName = "Cold"; break;
+                    case (int)EQResistTypeEnum.RESIST_POISON:
+                        resistName = "Poison"; break;
+                    case (int)EQResistTypeEnum.RESIST_DISEASE:
+                        resistName = "Disease"; break;
+                    case (int)EQResistTypeEnum.RESIST_CHROMATIC:
+                        resistName = "Chromatic (lowest)"; break;
+                    case (int)EQResistTypeEnum.RESIST_PRISMATIC:
+                        resistName = "Prismatic (average)"; break;
+                    case (int)EQResistTypeEnum.RESIST_PHYSICAL:
+                        resistName = "Physical"; break;
+                }
+
+                return String.Format("{0} ({1})", resistName, resistval);
+            }
+
+            return "N/A";
+        }
+
         public string EffectName(int effect)
         {
             switch (effect)
@@ -443,9 +497,9 @@ namespace Evie.Template
             int base2 = spell.base2[slot];
             int max = spell.max[slot];
             int calc = spell.calc[slot];
-            int effect_value = spell.CalcSpellEffectValue(slot, 70, 0, 1, 100, 1);
+            int effect_value = spell.CalcSpellEffectValue(slot); // just checking if increase/decrease with this value
 
-            string value_range = FormatSpellEffectValue_range(slot);
+            string value_range = FormatSpellEffectValue_range(slot); // format the range of values
             string incdec = EQSpell.IsSplurtFormula(calc) ? "Modify" : effect_value >= 0 ? "Increase" : "Decrease";
             string pertick = spell.IsBuff() ? " per tick" : "";
 

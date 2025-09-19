@@ -227,6 +227,54 @@ namespace Evie
             return (calc == 107 || calc == 108 || calc == 120 || calc == 122);
         }
 
+        public bool IsPureDispelSpell()
+        {
+            for (int i = 0; i < 12; i++)
+                if (!IsBlankSpellEffect(i) && effect[i] != (int)EQSpellEffectEnum.CancelMagic)
+                    return false;
+
+            return true;
+        }
+
+        bool IsAllianceSpellLine()
+        {
+            for (int i = 0; i < 12; i++)
+                if (effect[i] == (int)EQSpellEffectEnum.AddFaction) return true;
+
+            return false;
+        }
+
+        public bool IsResistable()
+        {
+            int beneficial = ConvertToInt32(goodEffect);
+
+            // Torven: dispels do not have a MR check; they have a different check that is entirely level based
+            if (IsDetrimental() && !IsPureDispelSpell() && !IsAllianceSpellLine() && ConvertToInt32(resisttype) != (int)EQResistTypeEnum.RESIST_NONE)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool IsDetrimental()
+        {
+            int beneficial = EQSpell.ConvertToInt32(goodEffect);
+            return beneficial == 0;
+        }
+
+        public bool NeedsTargetInRange()
+        {
+            int val = EQSpell.ConvertToInt32(targettype);
+            return EQTargetType.NeedsTargetInRange(val);
+        }
+
+        public bool IsAreaEffectTargetType()
+        {
+            int val = EQSpell.ConvertToInt32(targettype);
+            return EQTargetType.IsAreaEffectTargetType(val);
+        }
+
         // checked this against the titanium client and validated that it produces the same output for all formulas/durations/levels 20250913
         public static int CalcBuffDuration_formula(int level, int formula, int duration)
         {

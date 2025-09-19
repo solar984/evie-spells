@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using static Evie.EQTargetTypeEnum;
 
 namespace Evie
@@ -116,6 +115,69 @@ namespace Evie
 
             return String.Format("Unknown{0}", (int)targetType);
         }
+
+        public static bool NeedsTargetInRange(int targetType)
+        {
+            // titanium client target type list
+            switch (targetType)
+            {
+                // 0 and 1 are 'target optional' but if they have a target it has to be range checked
+                case 0:
+                case (int)ST_TargetOptional_1:
+
+                case (int)ST_Target_5:
+                case (int)ST_AETarget_8:
+                case (int)ST_Animal_9:
+                case (int)ST_Undead_10:
+                case (int)ST_Summoned_11:
+                case (int)ST_Flying_Unused_12: // not used in the spell file
+                case (int)ST_Tap_13:
+                case (int)ST_Pet_14: // auto targets pet
+                case (int)ST_Corpse_15:
+                case (int)ST_Plant_16:
+                case (int)ST_Giant_17:
+                case (int)ST_Dragon_18:
+                case (int)ST_TargetAETap_20:
+                case (int)ST_UNK_21: // not used in the spell file
+                case (int)ST_UNK_22: // not used in the spell file
+                case (int)ST_UNK_23: // not used in the spell file
+                case (int)ST_Insect1_27: // not used in the spell file
+                case (int)ST_Insect2_28: // not used in the spell file
+                case (int)ST_LDoNChest_Cursed_34:
+                case (int)ST_Muramite_35:
+                case (int)ST_SummonedPet_38: // auto targets pet
+                case (int)ST_GroupNoPets_39:
+                case (int)ST_GroupClientAndPet_43:
+
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsAreaEffectTargetType(int targetType)
+        {
+            switch (targetType)
+            {
+                case (int)ST_AEClientV1_2:
+                case (int)ST_GroupTeleport_3:
+                case (int)ST_AECaster_4:
+                case (int)ST_AETarget_8:
+                case (int)ST_TargetAETap_20:
+                case (int)ST_UndeadAE_24:
+                case (int)ST_SummonedAE_25:
+                case (int)ST_AETargetHateList_32:
+                case (int)ST_HateList_33:
+                case (int)ST_AreaClientOnly_36:
+                case (int)ST_AreaNPCOnly_37:
+                case (int)ST_AEBard_40:
+                case (int)ST_Group_41:
+                case (int)ST_Directional_42:
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     public enum EQTargetTypeEnum : int
@@ -206,6 +268,9 @@ namespace Evie
         ST_Directional_42 = 0x2a, //ae around this target between two angles
         /* 43 */
         ST_GroupClientAndPet_43 = 0x2b,
+
+        // post titanium below here
+
         /* 44 */
         ST_Beam_44 = 0x2c,
         /* 45 */
