@@ -54,6 +54,14 @@ namespace Evie
                 "search.html"
             );
 
+            // icons.css - must be before spell detail page, it reads this file
+            Render
+            (
+                "Icons.cshtml",
+                new { },
+                "icons.css"
+            );
+
             // spell detail - XXXX.html
             foreach (var spell in context.SpellFileRecords)
             {
@@ -82,6 +90,26 @@ namespace Evie
 
             // spell file
             File.Copy(Path.Combine("Titanium", "spells_us_dc86fe0303f5282fe8790f772ecaa93c.txt"), Path.Combine("www", "spells_us_dc86fe0303f5282fe8790f772ecaa93c.txt"), true);
+
+            // icons
+            File.Delete(Path.Combine(outputDirectory, "icons.css")); // this is just for including in the spell detail page
+            CopyDirectory("Icons", Path.Combine("www", "icons"));
+        }
+
+        public static void CopyDirectory(string sourceDirectory, string targetDirectory)
+        {
+            DirectoryInfo source = new DirectoryInfo(sourceDirectory);
+            DirectoryInfo target = new DirectoryInfo(targetDirectory);
+
+            target.Create();
+            CopyFilesRecursively(source, target);
+        }
+        public static void CopyFilesRecursively(DirectoryInfo source, DirectoryInfo target)
+        {
+            foreach (DirectoryInfo dir in source.GetDirectories())
+                CopyFilesRecursively(dir, target.CreateSubdirectory(dir.Name));
+            foreach (FileInfo file in source.GetFiles())
+                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
         }
 
         RazorLightEngine Engine { get; set; }

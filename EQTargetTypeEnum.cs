@@ -11,6 +11,8 @@ namespace Evie
 
             switch (targetType)
             {
+                case ST_TargetOptional_0:
+                    return "TargetOptional";
                 case ST_TargetOptional_1:
                     return "TargetOptional";
                 case ST_AEClientV1_2:
@@ -113,7 +115,7 @@ namespace Evie
                     return "TargetAENoPlayersPets";
             }
 
-            return String.Format("Unknown{0}", (int)targetType);
+            return String.Format("Unknown{0}", val);
         }
 
         public static bool NeedsTargetInRange(int targetType)
@@ -122,7 +124,7 @@ namespace Evie
             switch (targetType)
             {
                 // 0 and 1 are 'target optional' but if they have a target it has to be range checked
-                case 0:
+                case (int)ST_TargetOptional_0:
                 case (int)ST_TargetOptional_1:
 
                 case (int)ST_Target_5:
@@ -182,6 +184,8 @@ namespace Evie
 
     public enum EQTargetTypeEnum : int
     {
+        /* 00 */
+        ST_TargetOptional_0 = 0x00,
         /* 01 */
         ST_TargetOptional_1 = 0x01, //only used for targeted projectile spells
         /* 02 */

@@ -1,0 +1,55 @@
+﻿@using RazorLight
+.bookicon
+{
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	margin: 4px;
+}
+.bookicon-detrimental
+{
+	outline: 2px solid #ff0000;
+}
+.bookicon-beneficial
+{
+	outline: 2px solid #6e6ed9;
+}
+.gemicon
+{
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	margin: auto;
+	border-radius: 10px;
+}
+.gemholder
+{
+	width: 60px;
+	height: 48px;
+	padding: 0px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	clip-path: polygon(20% 0, 80% 0, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0 80%, 0 20%);
+}
+.gemholder-scale
+{
+	transform: scale(0.4);
+	transform-origin: top left;
+	margin-right: -30px;
+	margin-bottom: -28px;
+}
+@for (int i = 0; i <= 216; i++)
+{
+	string file = String.Format("icons/spells{0:D2}.png", i / 36 + 1);
+	int pos_x = (i % 6) * 40;
+	int pos_y = (i % 36) / 6 * 40;
+
+	<text>
+		.bi-@(i)
+		{
+		background-image: url(@(file));
+		background-position: -@(pos_x)px -@(pos_y)px;
+		}
+	</text>
+}

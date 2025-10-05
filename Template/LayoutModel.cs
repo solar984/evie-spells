@@ -9,5 +9,6 @@
 
         public TemplateRenderContext Context { get; set; }
         public string PageTitle { get; set; }
+        public string HeadContent { get; set; }
     }
 }

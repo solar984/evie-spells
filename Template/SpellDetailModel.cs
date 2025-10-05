@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 
 namespace Evie.Template
@@ -26,6 +27,11 @@ namespace Evie.Template
             return Context.SpellFileRecords.FirstOrDefault(s => s.id == spell_id.ToString());
         }
 
+        public ExtraNotes[] GetNotes()
+        {
+            return ExtraNotes.GetNotes(spell);
+        }
+
         public string FormatClasses()
         {
             StringBuilder sb = new StringBuilder();
@@ -44,6 +50,12 @@ namespace Evie.Template
         {
             int val = EQSpell.ConvertToInt32(string_val);
             return String.Format("{0}", val);
+        }
+
+        public string FormatDouble(string string_val)
+        {
+            double val = EQSpell.ConvertToDouble(string_val);
+            return String.Format("{0:F3}", val);
         }
 
         public string FormatTimeString(string string_ms)
@@ -177,6 +189,29 @@ namespace Evie.Template
             return FormatTimeString(spell.cast_time);
         }
 
+        public string FormatSkill()
+        {
+            int skill_id = EQSpell.ConvertToInt32(spell.skill);
+            return String.Format("{0}({1})", EQSkill.GetName(skill_id), skill_id);
+        }
+
+        public string FormatRecourse()
+        {
+            int recourse_spell_id = EQSpell.ConvertToInt32(spell.RecourseLink);
+            EQSpell recourse_spell = GetSpell(recourse_spell_id);
+            if (recourse_spell != null)
+            {
+                return String.Format("Recourse: Cast <a href=\"{0}.html\">{1}</a> on caster", recourse_spell_id, recourse_spell.name);
+            }
+            return "No recourse spell";
+        }
+
+        public string FormatHeadContent()
+        {
+            string icons_css = System.IO.File.ReadAllText(System.IO.Path.Combine("www", "icons.css"));
+            return String.Format("<style>{0}{1}</style>", Environment.NewLine, icons_css);
+        }
+
         public string FormatProcSpellDescription(int effect_slot)
         {
             // effect 85 has the proc spell id in base1 but for shadowknights +1 is added to the id
@@ -186,11 +221,11 @@ namespace Evie.Template
             EQSpell proc_spell = GetSpell(spell.GetProcSpellID(effect_slot, false));
             EQSpell proc_spell_sk = GetSpell(spell.GetProcSpellID(effect_slot, true));
 
-            string proc_spell_html = "";
+            string proc_spell_html = "N/A";
             if (proc_spell != null)
                 proc_spell_html = String.Format("<a href=\"{0}.html\">{1}</a>", proc_spell.id, proc_spell.name);
 
-            string proc_spell_sk_html = "";
+            string proc_spell_sk_html = "N/A";
             if (proc_spell_sk != null)
                 proc_spell_sk_html = String.Format("<a href=\"{0}.html\">{1}</a>", proc_spell_sk.id, proc_spell_sk.name);
 
@@ -235,7 +270,7 @@ namespace Evie.Template
             switch (spell.effect[effect_slot])
             {
                 case (int)EQSpellEffectEnum.WeaponProc:
-                    effectName = "Add Melee Proc:"; break;
+                    effectName = "Add Proc:"; break;
                 case (int)EQSpellEffectEnum.RangedProc:
                     effectName = "Add Ranged Proc:"; break;
                 case (int)EQSpellEffectEnum.DefensiveProc:
@@ -244,11 +279,32 @@ namespace Evie.Template
 
             string mod = spell.base2[effect_slot] != 0 ? String.Format(" mod {0}", spell.base2[effect_slot]) : "";
 
-            return String.Format("{0} {1}{3} ({2} for SK)", effectName, proc_spell_html, proc_spell_sk_html, mod);
+            string sk = String.Format(" ({0} for SK)", proc_spell_sk_html);
+            return String.Format("{0} {1}{2}{3}", effectName, proc_spell_html, mod, spell.effect[effect_slot] == (int)(EQSpellEffectEnum.WeaponProc) ? sk : "");
         }
 
-        public string FormatSpellEffectValue_range(int effect_slot, bool abs = true)
+        public class FSEVRRresult
         {
+            public EQSpell spell { get; set; }
+            public int effect_slot { get; set; }
+            public bool abs { get; set; }
+
+            public int low_value { get; set; }
+            public int low_level { get; set; }
+            public int high_value { get; set; }
+            public int high_level { get; set; }
+
+            public string FormattedString { get; set; }
+        }
+        public string FormatSpellEffectValue_range(int effect_slot, bool abs = true, bool percent = false, Func<int, int> valueConverter = null)
+        {
+            string formattedString = null;
+            int effect_id = spell.effect[effect_slot]; ;
+            bool isHasteEffect = new[] { (int)EQSpellEffectEnum.AttackSpeed, (int)EQSpellEffectEnum.AttackSpeed2, (int)EQSpellEffectEnum.AttackSpeed3 }.Contains(effect_id);
+            string unitstr = percent ? "%" : "";
+            if (valueConverter == null)
+                valueConverter = (i) => i;
+
             switch (spell.calc[effect_slot])
             {
                 // constant
@@ -284,35 +340,49 @@ namespace Evie.Template
                 case 132:
                 default:
                     {
-                        int lowestLevelToUse = 70;
+                        // this tries to show the beginning of the range from the level players first get the spell but sometimes
+                        // a spell can be found on an item even earlier than that so it doesn't always give good results.
+                        // for spells that players can't memorize, we will just show the scale from level 1, for player only spells,
+                        // it's nice to see the value it starts at when you first get it.
+                        int lowestPlayerLevelToUse = 71;
                         for (int eqclass = 1; eqclass <= 16; eqclass++)
                         {
-                            if (spell.classes[eqclass] < lowestLevelToUse)
-                                lowestLevelToUse = spell.classes[eqclass];
+                            if (spell.classes[eqclass] < lowestPlayerLevelToUse)
+                                lowestPlayerLevelToUse = spell.classes[eqclass];
                         }
 
-                        int low = 0, high = 0;
-                        string lowstr = "", highstr = "";
+                        int lowestLevelToUse = lowestPlayerLevelToUse <= 70 ? lowestPlayerLevelToUse : 1;
+                        int low_val = 0, low_level = 0, high_val = 0, high_level = 0;
                         for (int level = lowestLevelToUse; level <= 70; level++)
                         {
                             int val = spell.CalcSpellEffectValue(effect_slot, level);
+                            int orig_val = val;
                             if (abs) val = Math.Abs(val);
                             if (level == lowestLevelToUse)
                             {
-                                low = val;
-                                lowstr = String.Format("{0} (L{1})", val, level);
+                                low_val = val;
+                                low_level = level;
                             }
-                            if (val != high || level == lowestLevelToUse)
+                            if (val != high_val || level == lowestLevelToUse)
                             {
-                                high = val;
-                                highstr = String.Format("{0} (L{1})", val, level);
+                                high_val = val;
+                                high_level = level;
                             }
                         }
 
-                        if (high == low)
-                            return String.Format("{0}", low);
+                        if (high_val == low_val)
+                        {
+                            formattedString = String.Format("{0}{1}", valueConverter(low_val), unitstr);
+                        }
+                        else
+                        {
+                            string lowstr = String.Format("{0}{1} (L{2})", valueConverter(low_val), unitstr, low_level);
+                            string highstr = String.Format("{0}{1} (L{2})", valueConverter(high_val), unitstr, high_level);
 
-                        return String.Format("{0} to {1}", lowstr, highstr);
+                            formattedString = String.Format("{0} to {1}", lowstr, highstr);
+                        }
+
+                        break;
                     }
 
                 // varies with remaining duration, but duration can vary with level
@@ -321,17 +391,10 @@ namespace Evie.Template
                 case 120:
                 case 122:
                     {
-                        int pertick = 0;
-                        if (spell.calc[effect_slot] == 107) pertick = 1;
-                        if (spell.calc[effect_slot] == 108) pertick = 2;
-                        if (spell.calc[effect_slot] == 120) pertick = 5;
-                        if (spell.calc[effect_slot] == 122) pertick = 12;
-
                         // calculate max duration as level 70 i guess, rather than trying to list out duration variation too
                         int full_duration = EQSpell.CalcBuffDuration_formula(70, EQSpell.ConvertToInt32(spell.buffdurationformula), EQSpell.ConvertToInt32(spell.buffduration));
 
-                        int low = 0, high = 0;
-                        string lowstr = "", highstr = "";
+                        int low = 0, high = 0, high_duration = 0;
                         for (int duration = full_duration; duration > 0;)
                         {
                             duration--;
@@ -340,22 +403,35 @@ namespace Evie.Template
                             if (duration == full_duration || (low == 0 && val != low))
                             {
                                 low = val;
-                                lowstr = String.Format("{0} (initial)", val);
                             }
                             if (val != high || duration == full_duration)
                             {
                                 high = val;
-                                highstr = String.Format("{0} ({1} ticks)", val, full_duration - duration);
+                                high_duration = duration;
                             }
                         }
 
-                        string incdec = high > low ? "increasing" : "decreasing";
-                        string tickstr = String.Format("{0} by {1} each tick", incdec, pertick);
-
                         if (high == low)
-                            return String.Format("{0}", low);
+                        {
+                            formattedString = String.Format("{0}{1}", valueConverter(low), unitstr);
+                        }
+                        else
+                        {
+                            int pertick = 0;
+                            if (spell.calc[effect_slot] == 107) pertick = 1;
+                            if (spell.calc[effect_slot] == 108) pertick = 2;
+                            if (spell.calc[effect_slot] == 120) pertick = 5;
+                            if (spell.calc[effect_slot] == 122) pertick = 12;
 
-                        return String.Format("{0} to {1} ({2})", lowstr, highstr, tickstr);
+                            string incdec = high > low ? "increasing" : "decreasing";
+                            string tickstr = String.Format("{0} by {1} each tick", incdec, pertick);
+                            string lowstr = String.Format("{0}{1} (initial)", valueConverter(low), unitstr);
+                            string highstr = String.Format("{0}{1} ({2} ticks)", valueConverter(high), unitstr, full_duration - high_duration);
+
+                            formattedString = String.Format("{0} to {1} ({2})", lowstr, highstr, tickstr);
+                        }
+
+                        break;
                     }
 
                 // random
@@ -368,15 +444,16 @@ namespace Evie.Template
                             low = Math.Abs(low);
                             high = Math.Abs(high);
                         }
-                        return String.Format("{0} to {1} (random)", low, high);
+                        formattedString = String.Format("{0} to {1} (random)", low, high);
+
+                        break;
                     }
 
                 // varies with hp ratio
                 case 137:
                 case 138:
                     {
-                        int low = 0, high = 0;
-                        string lowstr = "", highstr = "";
+                        int low = 0, low_hp = 0, high = 0, high_hp = 0;
                         for (int cur_hp = 100; cur_hp >= 0; cur_hp--)
                         {
                             int val = spell.CalcSpellEffectValue(effect_slot, 70, 0, cur_hp, 100);
@@ -384,32 +461,44 @@ namespace Evie.Template
                             if (cur_hp == 100 || (low == 0 && val != low))
                             {
                                 low = val;
-                                lowstr = String.Format("{0} ({1}% HP)", val, cur_hp);
+                                low_hp = cur_hp;
                             }
                             if (val != high || cur_hp == 100)
                             {
                                 high = val;
-                                highstr = String.Format("{0} ({1}% HP)", val, cur_hp);
+                                high_hp = cur_hp;
                             }
                         }
                         if (high == low)
-                            return String.Format("{0}", low);
+                        {
+                            formattedString = String.Format("{0}", low);
+                        }
+                        else
+                        {
+                            string lowstr = String.Format("{0}{1} ({2}% HP)", valueConverter(low), unitstr, low_hp);
+                            string highstr = String.Format("{0}{1} ({2}% HP)", valueConverter(high), unitstr, high_hp);
 
-                        return String.Format("{0} to {1}", lowstr, highstr);
+                            formattedString = String.Format("{0} to {1}", lowstr, highstr);
+                        }
+
+                        break;
                     }
             }
 
             // constant
+            if (formattedString == null)
             {
                 int val = spell.CalcSpellEffectValue(effect_slot);
                 if (abs) val = Math.Abs(val);
-                return String.Format("{0}", val);
+                formattedString = String.Format("{0}{1}", valueConverter(val), unitstr);
             }
+
+            return formattedString;
         }
 
-        public string FormatEffectValues(int slot)
+        public string FormatEffectValues(int effect_slot)
         {
-            return String.Format("{0}({1}) {2}/{3}/{4}/{5}", Enum.GetName(typeof(EQSpellEffectEnum), spell.effect[slot]), spell.effect[slot], spell.base1[slot], spell.base2[slot], spell.max[slot], spell.calc[slot]);
+            return String.Format("{0}({1}) {2}/{3}/{4}/{5}", Enum.GetName(typeof(EQSpellEffectEnum), spell.effect[effect_slot]), spell.effect[effect_slot], spell.base1[effect_slot], spell.base2[effect_slot], spell.max[effect_slot], spell.calc[effect_slot]);
         }
 
         public string FormatResist()
@@ -451,6 +540,13 @@ namespace Evie.Template
             return "N/A";
         }
 
+        public string FormatAEDuration()
+        {
+            int duration_ms = EQSpell.ConvertToInt32(spell.AEDuration);
+
+            return String.Format("{0} ({1} hits)", FormatTimeString(spell.AEDuration), duration_ms / 2500);
+        }
+
         public string EffectName(int effect)
         {
             switch (effect)
@@ -465,6 +561,8 @@ namespace Evie.Template
                     return "AC";
                 case (int)EQSpellEffectEnum.SummonItem:
                     return "Summon Item";
+                case (int)EQSpellEffectEnum.SummonItemIntoBag:
+                    return "Summon Item (in bag)";
                 case (int)EQSpellEffectEnum.ResistPoison:
                     return "Poison Resist";
                 case (int)EQSpellEffectEnum.ResistMagic:
@@ -485,6 +583,14 @@ namespace Evie.Template
                     return "Mana when cast";
                 case (int)EQSpellEffectEnum.CurrentEnduranceOnce:
                     return "Endurance when cast";
+                case (int)EQSpellEffectEnum.AttackSpeed:
+                    return "Haste v1";
+                case (int)EQSpellEffectEnum.AttackSpeed2:
+                    return "Haste v2";
+                case (int)EQSpellEffectEnum.AttackSpeed3:
+                    return "Haste v3 (overhaste)";
+                case (int)EQSpellEffectEnum.MovementSpeed:
+                    return "Movement Speed";
             }
 
             return Enum.GetName(typeof(EQSpellEffectEnum), effect);
@@ -540,8 +646,10 @@ namespace Evie.Template
                         return FormatProcSpellDescription(slot);
                     }
                 case (int)EQSpellEffectEnum.SummonItem:
+                case (int)EQSpellEffectEnum.SummonItemIntoBag:
                     {
-                        return String.Format("{0}: <a href=\"http://lucy.allakhazam.com/item.html?id={1}\">{1}</a>", EffectName(spell.effect[slot]), base1);
+                        string summon_qty_str = value_range != "1" ? String.Format(" x {0}", value_range) : "";
+                        return String.Format("{0}: <a href=\"http://lucy.allakhazam.com/item.html?id={1}\">{1}</a>{2}", EffectName(spell.effect[slot]), base1, summon_qty_str);
                     }
                 case (int)EQSpellEffectEnum.Fear:
                     {
@@ -553,14 +661,43 @@ namespace Evie.Template
                         string levelLimit = spell.max[slot] != 0 ? String.Format(" up to level {0}", spell.max[slot]) : "";
                         return String.Format("{0} for {1}{2}", EffectName(spell.effect[slot]), FormatTimeString(spell.base1[slot].ToString()), levelLimit);
                     }
+                case (int)EQSpellEffectEnum.AttackSpeed:
+                case (int)EQSpellEffectEnum.AttackSpeed2:
+                case (int)EQSpellEffectEnum.AttackSpeed3:
+                    {
+                        if (effect != (int)EQSpellEffectEnum.AttackSpeed3) // effect 119 only has values 0-30, doesn't include the 100
+                        {
+                            incdec = Math.Abs(spell.base1[slot]) < 100 ? "Decrease" : "Increase";
+                        }
+                        var vc = (int i) =>
+                        {
+                            return Math.Abs(i + (effect == (int)EQSpellEffectEnum.AttackSpeed3 ? 0 : -100));
+                        };
+                        value_range = FormatSpellEffectValue_range(slot, false, true, vc);
+                        goto case (int)EQSpellEffectEnum.CHA;
+                    }
+                case (int)EQSpellEffectEnum.MovementSpeed:
+                    {
+                        value_range = FormatSpellEffectValue_range(slot, true, true);
+                        goto case (int)EQSpellEffectEnum.CHA;
+                    }
+                case (int)EQSpellEffectEnum.Teleport:
+                case (int)EQSpellEffectEnum.Teleport2:
+                case (int)EQSpellEffectEnum.Translocate:
+                    {
+                        return String.Format("{0} to {1}, {2}, {3} heading {4} in {5}",
+                            effect == (int)EQSpellEffectEnum.Translocate ? "Translocate" : "Teleport",
+                            EQSpell.ConvertToDouble(spell.effect_base_value1),
+                            EQSpell.ConvertToDouble(spell.effect_base_value2),
+                            EQSpell.ConvertToDouble(spell.effect_base_value3),
+                            EQSpell.ConvertToDouble(spell.effect_base_value4),
+                            spell.teleport_zone);
+                    }
                 default:
                     {
-                        //return String.Format("{0} {1}{2}", EffectName(spell.effect[slot]), effect_value > 0 ? "+" : "", effect_value);
                         return String.Format("{0} {1}", EffectName(spell.effect[slot]), FormatSpellEffectValue_range(slot, false));
                     }
             }
-
-            //return EffectName(spell.effect[slot]);
         }
     }
 }

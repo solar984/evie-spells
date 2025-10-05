@@ -1,6 +1,8 @@
 ﻿using Evie.Titanium;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System;
 using System.Globalization;
+using static Evie.EQTargetTypeEnum;
 
 namespace Evie
 {
@@ -88,18 +90,18 @@ namespace Evie
                                     throw new IndexOutOfRangeException();
                                 switch (index)
                                 {
-                                    case 0: return ConvertToInt32(s.effect_base_value1);
-                                    case 1: return ConvertToInt32(s.effect_base_value2);
-                                    case 2: return ConvertToInt32(s.effect_base_value3);
-                                    case 3: return ConvertToInt32(s.effect_base_value4);
-                                    case 4: return ConvertToInt32(s.effect_base_value5);
-                                    case 5: return ConvertToInt32(s.effect_base_value6);
-                                    case 6: return ConvertToInt32(s.effect_base_value7);
-                                    case 7: return ConvertToInt32(s.effect_base_value8);
-                                    case 8: return ConvertToInt32(s.effect_base_value9);
-                                    case 9: return ConvertToInt32(s.effect_base_value10);
-                                    case 10: return ConvertToInt32(s.effect_base_value11);
-                                    case 11: return ConvertToInt32(s.effect_base_value12);
+                                    case 0: return (int)ConvertToDouble(s.effect_base_value1);
+                                    case 1: return (int)ConvertToDouble(s.effect_base_value2);
+                                    case 2: return (int)ConvertToDouble(s.effect_base_value3);
+                                    case 3: return (int)ConvertToDouble(s.effect_base_value4);
+                                    case 4: return (int)ConvertToDouble(s.effect_base_value5);
+                                    case 5: return (int)ConvertToDouble(s.effect_base_value6);
+                                    case 6: return (int)ConvertToDouble(s.effect_base_value7);
+                                    case 7: return (int)ConvertToDouble(s.effect_base_value8);
+                                    case 8: return (int)ConvertToDouble(s.effect_base_value9);
+                                    case 9: return (int)ConvertToDouble(s.effect_base_value10);
+                                    case 10: return (int)ConvertToDouble(s.effect_base_value11);
+                                    case 11: return (int)ConvertToDouble(s.effect_base_value12);
                                 }
                             }
                             break;
@@ -236,7 +238,20 @@ namespace Evie
             return true;
         }
 
-        bool IsAllianceSpellLine()
+        public int SpellEffectIndex(int effect_id)
+        {
+            for (int i = 0; i < 12; i++)
+                if (effect[i] == effect_id) return i;
+
+            return -1;
+        }
+
+        public bool IsEffectInSpell(int effect_id)
+        {
+            return SpellEffectIndex(effect_id) != -1;
+        }
+
+        public bool IsAllianceSpellLine()
         {
             for (int i = 0; i < 12; i++)
                 if (effect[i] == (int)EQSpellEffectEnum.AddFaction) return true;
@@ -273,6 +288,83 @@ namespace Evie
         {
             int val = EQSpell.ConvertToInt32(targettype);
             return EQTargetType.IsAreaEffectTargetType(val);
+        }
+
+        public bool IsAEDurationSpell()
+        {
+            int tt = ConvertToInt32(targettype);
+            return ConvertToInt32(AEDuration) >= 2500 &&
+            (
+                tt == (int)EQTargetTypeEnum.ST_AETarget_8 ||
+                tt == (int)EQTargetTypeEnum.ST_AECaster_4
+            );
+        }
+
+        public string GetSpellGemColorHexString()
+        {
+            uint color = GetSpellGemColor();
+            return String.Format("#{0:X6}", color);
+        }
+        public uint GetSpellGemColor()
+        {
+            EQTargetTypeEnum targetType = (EQTargetTypeEnum)ConvertToInt32(targettype);
+
+            uint result = 0x000000u;
+            switch (targetType)
+            {
+                case ST_TargetOptional_0:
+                case ST_TargetOptional_1:
+                case ST_Target_5:
+                case ST_UNK_7:
+                case ST_Animal_9:
+                case ST_Undead_10:
+                case ST_Summoned_11:
+                case ST_Flying_Unused_12:
+                case ST_Tap_13:
+                case ST_Pet_14:
+                case ST_Corpse_15:
+                case ST_Plant_16:
+                case ST_Giant_17:
+                case ST_Dragon_18:
+                case ST_Coldain_Unused_19:
+                case ST_TargetAETap_20:
+                case ST_Insect1_27:
+                case ST_LDoNChest_Cursed_34:
+                case ST_SummonedPet_38:
+                case ST_GroupClientAndPet_43:
+                    result = 0xDE2121u;
+                    break;
+                case ST_AEClientV1_2:
+                case ST_AECaster_4:
+                case ST_UndeadAE_24:
+                case ST_SummonedAE_25:
+                case ST_UNK_26:
+                case ST_UNK_29:
+                case ST_UNK_31:
+                case ST_Directional_42:
+                    result = 0x5242DEu;
+                    break;
+                case ST_GroupTeleport_3:
+                case ST_AEBard_40:
+                case ST_Group_41:
+                    result = 0x9C31DEu;
+                    break;
+                case ST_Self_6:
+                    result = 0xCEDE29u;
+                    break;
+                case ST_AETarget_8:
+                case ST_UNK_21:
+                case ST_UNK_22:
+                case ST_UNK_23:
+                case ST_Insect2_28:
+                case ST_UNK_30:
+                    result = ConvertToInt32(AEDuration) < 3000 ? 0x42DE63u : 0xDE7B21u;
+                    break;
+                default:
+                    return result;
+            }
+
+            return result;
         }
 
         // checked this against the titanium client and validated that it produces the same output for all formulas/durations/levels 20250913
@@ -351,7 +443,35 @@ namespace Evie
             int buff_duration_formula = EQSpell.ConvertToInt32(buffdurationformula);
             int buff_duration = EQSpell.ConvertToInt32(buffduration);
 
-            return CalcSpellEffectValue_formula(effect_id, formula, base_value, max_value, buff_duration_formula, buff_duration, level, ticsremaining, cur_hp, max_hp, randomhigh);
+            // Summon item can use formulas but in a differen way
+            if (effect_id == (int)EQSpellEffectEnum.SummonItem || effect_id == (int)EQSpellEffectEnum.SummonItemIntoBag)
+            {
+                if (formula < 100) return formula;
+                base_value = 0;
+                max_value = 0;
+            }
+
+            int val = CalcSpellEffectValue_formula(effect_id, formula, base_value, max_value, buff_duration_formula, buff_duration, level, ticsremaining, cur_hp, max_hp, randomhigh);
+
+            // Summon item can use formulas but in a differen way
+            if (effect_id == (int)EQSpellEffectEnum.SummonItem || effect_id == (int)EQSpellEffectEnum.SummonItemIntoBag)
+            {
+                if (formula >= 100)
+                {
+                    int stacksize = 20; // need to know real value
+                    int min_qty = max[effect_slot];
+                    if (min_qty == 0) min_qty = stacksize;
+
+                    if (val < min_qty)
+                        val = min_qty;
+                    if (val < 1)
+                        val = 1;
+
+                    if (val > stacksize) val = stacksize;
+                }
+            }
+
+            return val;
         }
 
         public static int CalcSpellEffectValue_formula(int effect_id, int formula, int base_value, int max_value, int buff_duration_formula, int buff_duration, int level, int ticsremaining, int cur_hp, int max_hp, int randomhigh)
@@ -474,7 +594,6 @@ namespace Evie
                     break;
 
                 case 123:
-                    //formula_value = zone->random.Int(1, max_value - base_abs);
                     formula_value = randomhigh != 0 ? max_value - base_abs : 1;
                     break;
 

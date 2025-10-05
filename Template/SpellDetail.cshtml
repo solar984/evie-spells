@@ -1,6 +1,5 @@
 ﻿@using Evie
 @using RazorLight
-@using System.Globalization
 @inherits TemplatePage<Evie.Template.SpellDetailModel>
 @model Evie.Template.SpellDetailModel
 @{
@@ -10,7 +9,8 @@
 {
 	var s = Model.spell;
 	Model.PageTitle = s.name;
-	<table width="100%" class="header"><tr><td><h2>@(s.name)</h2></td><td align=right>@*<a href="stacking_@(s.id).html">Stacking Info</a>*@</td></tr></table>
+	Model.HeadContent = Model.FormatHeadContent();
+	<table width="100%" class="header"><tr><td><div class="heading-with-icon"><div class="bookicon bi-@(s.new_icon) @(s.IsDetrimental() ? "bookicon-detrimental" : "bookicon-beneficial")"></div><h2>@(s.name)</h2></div></td><td align=right>@*<a href="stacking_@(s.id).html">Stacking Info</a>*@</td></tr></table>
 	<br>
 	<br>
 	<table width="60%">
@@ -22,6 +22,22 @@
 				<tr><td class="effect-label">@(i + 1)</td><td class="value">@Raw(Model.FormatEffectDescription(i))</td><td class="value">@(Model.FormatEffectValues(i))</td></tr>
 			}
 		}
+		@if (EQSpell.ConvertToDouble(s.pushback) != 0.0 || EQSpell.ConvertToDouble(s.pushup) != 0.0 || EQSpell.ConvertToInt32(s.RecourseLink) != 0)
+		{
+			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+		}
+		@if (EQSpell.ConvertToDouble(s.pushback) != 0.0)
+		{
+			<tr><td class="effect-label"></td><td>Push Force: @(Model.FormatDouble(s.pushback))</td></tr>
+		}
+		@if (EQSpell.ConvertToDouble(s.pushup) != 0.0)
+		{
+			<tr><td class="effect-label"></td><td>Push Up Angle: @(Model.FormatDouble(s.pushup))</td></tr>
+		}
+		@if (EQSpell.ConvertToInt32(s.RecourseLink) != 0)
+		{
+			<tr><td class="effect-label"></td><td>@Raw(Model.FormatRecourse())</td></tr>
+		}
 	</table>
 	<br>
 	<br>
@@ -29,7 +45,19 @@
 		<tr><td class="label">ID</td><td class="value">@(Model.FormatInt(s.id))</td></tr>
 		<tr><td class="label">Spell Type</td><td class="value">@(Model.FormatDetrimental())</td></tr>
 		<tr><td class="label">Mana</td><td class="value">@(Model.FormatInt(s.mana))</td></tr>
-		<tr><td class="label">Target Type</td><td class="value">@(Model.FormatTargetType())</td></tr>
+		<tr>
+			<td class="label">Target Type</td>
+			<td class="value">
+				<div class="targettype">
+					<div class="gemholder-scale">
+						<div class="gemholder" style="background-color: @(s.GetSpellGemColorHexString());">
+							<div class="gemicon bi-@(s.new_icon)"></div>
+						</div>
+					</div>
+				@(Model.FormatTargetType())
+				</div>
+			</td>
+		</tr>
 		@if (s.NeedsTargetInRange())
 		{
 			<tr><td class="label">Range to Target</td><td class="value">@(Model.FormatInt(s.range))</td></tr>
@@ -56,11 +84,15 @@
 			<tr><td class="label">Duration</td><td class="value">@(Model.FormatBuffDuration())</td></tr>
 			<tr><td class="label">Duration Calc</td><td class="value">@(Model.FormatBuffDurationCalc())</td></tr>
 		}
+		@if (s.IsAEDurationSpell())
+		{
+			<tr><td class="label">AEDuration</td><td class="value">@(Model.FormatAEDuration())</td></tr>
+		}
 		@if (s.IsDetrimental())
 		{
 			<tr><td class="label">Resist</td><td class="value">@(Model.FormatResist())</td></tr>
 		}
-		<tr><td class="label">Skill</td><td class="value">@(s.skill)</td></tr>
+		<tr><td class="label">Skill</td><td class="value">@(Model.FormatSkill())</td></tr>
 		<tr><td class="label">Classes</td><td class="value">@(Model.FormatClasses())</td></tr>
 	</table>
 	<br />
@@ -98,6 +130,19 @@
 	<a href="http://everquest.allakhazam.com/db/spell.html?spell=@(s.id)" target="_blank">Allakhazam's page for this spell</a>
 	<br>
 	<a href="http://lucy.allakhazam.com/spell.html?id=@(s.id)" target="_blank">EQPC Lucy's page for this spell</a>
+	var notes = Model.GetNotes();
+	if (notes != null && notes.Length > 0)
+	{
+		<br />
+		<br />
+		<table class="table-notes">
+			<tr><td class="header">Notes</td><td class="header"></td></tr>
+			@foreach (var n in notes)
+			{
+				<tr><td class="label">@Raw(n.Name)</td><td class="notes-content">@Raw(n.Content)</td></tr>
+			}
+		</table>
+	}
 }
 else
 {
