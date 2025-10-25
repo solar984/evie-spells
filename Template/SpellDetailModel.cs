@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Text;
 
 namespace Evie.Template
@@ -109,12 +107,7 @@ namespace Evie.Template
                 if (EQSpell.ConvertToInt32(spell.buffdurationformula) == 50)
                     return "Permanent";
 
-                int lowestLevelToUse = 70;
-                for (int eqclass = 1; eqclass <= 16; eqclass++)
-                {
-                    if (spell.classes[eqclass] < lowestLevelToUse)
-                        lowestLevelToUse = spell.classes[eqclass];
-                }
+                int lowestLevelToUse = spell.LowestLevelToUse();
 
                 int low = 0, high = 0;
                 string lowstr = "", highstr = "";
@@ -547,6 +540,197 @@ namespace Evie.Template
             return String.Format("{0} ({1} hits)", FormatTimeString(spell.AEDuration), duration_ms / 2500);
         }
 
+        public bool UsesReagents()
+        {
+            return (String.IsNullOrWhiteSpace(spell.components1) || spell.components1 == "-1") ? false : true;
+        }
+        public string FormatReagent()
+        {
+            if (String.IsNullOrWhiteSpace(spell.components1) || spell.components1 == "-1") return "";
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 1; i <= 4; i++)
+            {
+                int item_id = -1, quantity = 1;
+                switch (i)
+                {
+                    case 1:
+                        item_id = EQSpell.ConvertToInt32(spell.components1);
+                        quantity = EQSpell.ConvertToInt32(spell.component_counts1);
+                        break;
+                    case 2:
+                        item_id = EQSpell.ConvertToInt32(spell.components2);
+                        quantity = EQSpell.ConvertToInt32(spell.component_counts2);
+                        break;
+                    case 3:
+                        item_id = EQSpell.ConvertToInt32(spell.components3);
+                        quantity = EQSpell.ConvertToInt32(spell.component_counts3);
+                        break;
+                    case 4:
+                        item_id = EQSpell.ConvertToInt32(spell.components4);
+                        quantity = EQSpell.ConvertToInt32(spell.component_counts4);
+                        break;
+                }
+                if (item_id != -1)
+                {
+                    string quantity_str = quantity > 1 ? String.Format(" x{0}", quantity) : "";
+                    sb.Append(String.Format("{2}<a href=\"http://lucy.allakhazam.com/item.html?id={0}\">{0}</a>{1}", item_id, quantity_str, i > 1 ? ", " : ""));
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public string build_spell_description_token_string(string spell_description)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int pos = 0; pos < spell_description.Length; pos++)
+            {
+                switch (spell_description[pos])
+                {
+                    case '%':
+                        if (pos + 1 < spell_description.Length)
+                        {
+                            switch (spell_description[pos + 1])
+                            {
+                                case 'Y': // duration for current character level
+                                case 'y':
+                                case 'Z': // duration limit
+                                case 'z':
+                                    int duration = EQSpell.ConvertToInt32(spell.buffduration);
+                                    if (spell_description[pos + 1] == 'Y' || spell_description[pos + 1] == 'y')
+                                    {
+                                        duration = EQSpell.CalcBuffDuration_formula(spell.LowestLevelToUse(), EQSpell.ConvertToInt32(spell.buffdurationformula), EQSpell.ConvertToInt32(spell.buffduration));
+                                    }
+                                    sb.AppendFormat(" {0}:{1:00}:{2:00}", 6 * duration / 3600, 6 * duration / 60 % 60, 6 * duration % 60);
+                                    break;
+                            }
+                        }
+                        pos++;
+                        break;
+
+                    case '#': // effect value low
+                    case '@': // effect value high
+                        if (pos + 1 < spell_description.Length)
+                        {
+                            int effect_slot = -1;
+                            switch (spell_description[pos + 1])
+                            {
+                                case '1':
+                                    effect_slot = 0;
+                                    break;
+                                case '2':
+                                    effect_slot = 1;
+                                    break;
+                                case '3':
+                                    effect_slot = 2;
+                                    break;
+                                case '4':
+                                    effect_slot = 3;
+                                    break;
+                                case '5':
+                                    effect_slot = 4;
+                                    break;
+                                case '6':
+                                    effect_slot = 5;
+                                    break;
+                                case '7':
+                                    effect_slot = 6;
+                                    break;
+                                case '8':
+                                    effect_slot = 7;
+                                    break;
+                                case '9':
+                                    effect_slot = 8;
+                                    break;
+                                case 'A':
+                                case 'a':
+                                    effect_slot = 9;
+                                    break;
+                                case 'B':
+                                case 'b':
+                                    effect_slot = 10;
+                                    break;
+                                case 'C':
+                                case 'c':
+                                    effect_slot = 11;
+                                    break;
+                            }
+                            if (effect_slot >= 0)
+                            {
+                                int level = 70;
+                                if (spell_description[pos] == '#')
+                                {
+                                    level = Math.Min(spell.LowestLevelToUse(), 70);
+                                }
+
+                                int max = spell.max[effect_slot];
+                                int effect_id = spell.effect[effect_slot];
+                                int base1 = spell.base1[effect_slot];
+                                int calc = spell.calc[effect_slot];
+
+                                int val = spell_description[pos] == '#' ? base1 : max;
+                                if ((effect_id == (int)EQSpellEffectEnum.CurrentHP && calc != 123) || effect_id == (int)EQSpellEffectEnum.CurrentHPOnce || effect_id == (int)EQSpellEffectEnum.BardAEDot)
+                                {
+                                    val = spell.CalcSpellEffectValue(effect_slot, level);
+                                }
+                                sb.AppendFormat("{0}", Math.Abs(val));
+                            }
+                        }
+                        pos++;
+                        break;
+
+                    default:
+                        sb.Append(spell_description[pos]);
+                        break;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public string FormatGameDescription()
+        {
+            if (!String.IsNullOrEmpty(spell.descnum))
+            {
+                int dbstrid = EQSpell.ConvertToInt32(spell.descnum);
+                string dbstr = Context.EQStringDB.GetString(dbstrid, 6);
+
+                return build_spell_description_token_string(dbstr);
+            }
+
+            return String.Empty;
+        }
+
+        public string FormatSpellCategory1()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (!String.IsNullOrEmpty(spell.typedescnum) && !String.IsNullOrEmpty(spell.effectdescnum))
+            {
+                string typedesc = Context.EQStringDB.GetString(EQSpell.ConvertToInt32(spell.typedescnum), 5);
+                string effectdesc = Context.EQStringDB.GetString(EQSpell.ConvertToInt32(spell.effectdescnum), 5);
+                sb.AppendFormat("{0} -> {1}", typedesc, effectdesc);
+            }
+
+            return sb.ToString();
+        }
+
+        public string FormatSpellCategory2()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (!String.IsNullOrEmpty(spell.typedescnum) && !String.IsNullOrEmpty(spell.effectdescnum2))
+            {
+                string typedesc = Context.EQStringDB.GetString(EQSpell.ConvertToInt32(spell.typedescnum), 5);
+                string effectdesc = Context.EQStringDB.GetString(EQSpell.ConvertToInt32(spell.effectdescnum2), 5);
+                sb.AppendFormat("{0} -> {1}", typedesc ?? "", effectdesc ?? "");
+            }
+
+            return sb.ToString();
+        }
+
         public string EffectName(int effect)
         {
             switch (effect)
@@ -557,6 +741,8 @@ namespace Evie.Template
                     return "Mana";
                 case (int)EQSpellEffectEnum.CurrentEndurance:
                     return "Endurance";
+                case (int)EQSpellEffectEnum.InstantHate:
+                    return "Instant Hate";
                 case (int)EQSpellEffectEnum.ArmorClass:
                     return "AC";
                 case (int)EQSpellEffectEnum.SummonItem:
@@ -591,6 +777,8 @@ namespace Evie.Template
                     return "Haste v3 (overhaste)";
                 case (int)EQSpellEffectEnum.MovementSpeed:
                     return "Movement Speed";
+                case (int)EQSpellEffectEnum.ChangeAggro:
+                    return "Hate Modifier";
             }
 
             return Enum.GetName(typeof(EQSpellEffectEnum), effect);
@@ -614,6 +802,7 @@ namespace Evie.Template
                 case (int)EQSpellEffectEnum.CurrentHP:
                 case (int)EQSpellEffectEnum.CurrentMana:
                 case (int)EQSpellEffectEnum.CurrentEndurance:
+                case (int)EQSpellEffectEnum.Hate:
                     {
                         return String.Format("{0} {1} by {2}{3}", incdec, EffectName(spell.effect[slot]), value_range, pertick);
                     }
@@ -636,6 +825,7 @@ namespace Evie.Template
                 case (int)EQSpellEffectEnum.CurrentHPOnce:
                 case (int)EQSpellEffectEnum.CurrentManaOnce:
                 case (int)EQSpellEffectEnum.CurrentEnduranceOnce:
+                case (int)EQSpellEffectEnum.InstantHate:
                     {
                         return String.Format("{0} {1} by {2}", incdec, EffectName(spell.effect[slot]), value_range);
                     }
@@ -677,6 +867,7 @@ namespace Evie.Template
                         goto case (int)EQSpellEffectEnum.CHA;
                     }
                 case (int)EQSpellEffectEnum.MovementSpeed:
+                case (int)EQSpellEffectEnum.ChangeAggro:
                     {
                         value_range = FormatSpellEffectValue_range(slot, true, true);
                         goto case (int)EQSpellEffectEnum.CHA;
@@ -684,6 +875,7 @@ namespace Evie.Template
                 case (int)EQSpellEffectEnum.Teleport:
                 case (int)EQSpellEffectEnum.Teleport2:
                 case (int)EQSpellEffectEnum.Translocate:
+                case (int)EQSpellEffectEnum.Succor:
                     {
                         return String.Format("{0} to {1}, {2}, {3} heading {4} in {5}",
                             effect == (int)EQSpellEffectEnum.Translocate ? "Translocate" : "Teleport",
@@ -692,6 +884,21 @@ namespace Evie.Template
                             EQSpell.ConvertToDouble(spell.effect_base_value3),
                             EQSpell.ConvertToDouble(spell.effect_base_value4),
                             spell.teleport_zone);
+                    }
+                case (int)EQSpellEffectEnum.SkillAttack:
+                    {
+                        string hitchance = spell.base2[slot] != 0 ? String.Format(" ({0}% hit chance bonus)", spell.base2[slot] / 100) : "";
+                        return String.Format("{0} attack for {1} base damage{2}", EQSkill.GetName(EQSpell.ConvertToInt32(spell.skill)), spell.base1[slot], hitchance);
+                    }
+                case (int)EQSpellEffectEnum.SkillDamageTaken:
+                    {
+                        string skillstr = spell.base2[slot] != -1 ? EQSkill.GetName(spell.base2[slot]) : "all";
+                        return String.Format("{0} {1} skill damage taken by {2}", incdec, skillstr, value_range);
+                    }
+                case (int)EQSpellEffectEnum.DamageModifier:
+                    {
+                        string skillstr = spell.base2[slot] != -1 ? EQSkill.GetName(spell.base2[slot]) : "all";
+                        return String.Format("{0} {1} skill damage dealt by {2}", incdec, skillstr, value_range);
                     }
                 default:
                     {

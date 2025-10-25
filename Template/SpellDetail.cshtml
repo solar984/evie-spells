@@ -22,7 +22,7 @@
 				<tr><td class="effect-label">@(i + 1)</td><td class="value">@Raw(Model.FormatEffectDescription(i))</td><td class="value">@(Model.FormatEffectValues(i))</td></tr>
 			}
 		}
-		@if (EQSpell.ConvertToDouble(s.pushback) != 0.0 || EQSpell.ConvertToDouble(s.pushup) != 0.0 || EQSpell.ConvertToInt32(s.RecourseLink) != 0)
+		@if (true || EQSpell.ConvertToDouble(s.pushback) != 0.0 || EQSpell.ConvertToDouble(s.pushup) != 0.0 || EQSpell.ConvertToInt32(s.RecourseLink) != 0 || Model.UsesReagents())
 		{
 			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 		}
@@ -38,13 +38,41 @@
 		{
 			<tr><td class="effect-label"></td><td>@Raw(Model.FormatRecourse())</td></tr>
 		}
+		@if (Model.UsesReagents())
+		{
+			<tr><td class="effect-label"></td><td>Reagent: @Raw(Model.FormatReagent())</td></tr>
+		}
 	</table>
-	<br>
-	<br>
+	<br />
+	<br />
+	@if (EQSpell.ConvertToInt32(s.descnum) != 0)
+	{
+		string str = Model.FormatGameDescription();
+		if (!String.IsNullOrWhiteSpace(str))
+		{
+			<table width="40%">
+				<tr><td class="header">In-Game Description</td></tr>
+				<tr><td>@Raw(str)</td></tr>
+			</table>
+			<br />
+			<br />
+		}
+	}
 	<table>
 		<tr><td class="label">ID</td><td class="value">@(Model.FormatInt(s.id))</td></tr>
 		<tr><td class="label">Spell Type</td><td class="value">@(Model.FormatDetrimental())</td></tr>
-		<tr><td class="label">Mana</td><td class="value">@(Model.FormatInt(s.mana))</td></tr>
+		@if (EQSpell.ConvertToInt32(s.mana) != 0)
+		{
+			<tr><td class="label">Mana Cost</td><td class="value">@(Model.FormatInt(s.mana))</td></tr>
+		}
+		@if (EQSpell.ConvertToInt32(s.EndurCost) != 0)
+		{
+			<tr><td class="label">Endurance Cost</td><td class="value">@(Model.FormatInt(s.EndurCost))</td></tr>
+		}
+		@if (EQSpell.ConvertToInt32(s.EndurUpkeep) != 0)
+		{
+			<tr><td class="label">Endurance Upkeep</td><td class="value">@(Model.FormatInt(s.EndurUpkeep))</td></tr>
+		}
 		<tr>
 			<td class="label">Target Type</td>
 			<td class="value">
@@ -54,7 +82,7 @@
 							<div class="gemicon bi-@(s.new_icon)"></div>
 						</div>
 					</div>
-				@(Model.FormatTargetType())
+					@(Model.FormatTargetType())
 				</div>
 			</td>
 		</tr>
@@ -94,15 +122,17 @@
 		}
 		<tr><td class="label">Skill</td><td class="value">@(Model.FormatSkill())</td></tr>
 		<tr><td class="label">Classes</td><td class="value">@(Model.FormatClasses())</td></tr>
+		@if (!String.IsNullOrEmpty(s.typedescnum) && !String.IsNullOrEmpty(s.effectdescnum))
+		{
+			<tr><td class="label">Category</td><td>@Model.FormatSpellCategory1()</td></tr>
+		}
+		@if (!String.IsNullOrEmpty(s.typedescnum) && !String.IsNullOrEmpty(s.effectdescnum2))
+		{
+			<tr><td class="label">Category</td><td>@Model.FormatSpellCategory2()</td></tr>
+		}
 	</table>
 	<br />
 	<br />
-	if (s.IsBuff())
-	{
-
-	}
-	<br>
-	<br>
 	<table>
 		@if (!String.IsNullOrEmpty(s.you_cast))
 		{
@@ -125,8 +155,13 @@
 			<tr><td class="label">Wears off</td><td>@(s.spell_fades)</td></tr>
 		}
 	</table>
-	<br>
-	<br>
+	<br />
+	<br />
+	<details>
+		<summary><span>Raw spell data</span></summary>
+		<pre>@Model.spell.RawDataString()</pre>
+	</details>
+	<br />
 	<a href="http://everquest.allakhazam.com/db/spell.html?spell=@(s.id)" target="_blank">Allakhazam's page for this spell</a>
 	<br>
 	<a href="http://lucy.allakhazam.com/spell.html?id=@(s.id)" target="_blank">EQPC Lucy's page for this spell</a>

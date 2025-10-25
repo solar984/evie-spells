@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
 
 namespace Evie.Titanium
 {
@@ -959,6 +962,26 @@ namespace Evie.Titanium
         [Column("field236", Order = 236)]
         public string field236 { get; set; }
 #endif
+
+        public string RawDataString()
+        {
+            string indent = "    ";
+            StringBuilder sb = new StringBuilder();
+            foreach (var p in typeof(SpellFileRecord).GetProperties())
+            {
+                var ca = p.GetCustomAttributes(true).Where(a => a.GetType().Name == "ColumnAttribute").FirstOrDefault() as ColumnAttribute;
+                if (ca != null)
+                {
+                    int fieldNumber = ca.Order;
+                    string fieldName = ca.Name;
+                    object fieldValue = p.GetValue(this);
+
+                    sb.AppendLine(String.Format("{0}{2,4}{0}{1,27}:{0}{3}", indent, fieldName, fieldNumber, fieldValue));
+                }
+            }
+
+            return sb.ToString();
+        }
 
         public override System.String ToString()
         {

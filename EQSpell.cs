@@ -1,5 +1,4 @@
 ﻿using Evie.Titanium;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System;
 using System.Globalization;
 using static Evie.EQTargetTypeEnum;
@@ -367,6 +366,27 @@ namespace Evie
             return result;
         }
 
+        public int LowestLevelToUse(int classnum = -1)
+        {
+            int lowestLevelToUse = 255;
+            if (classnum != -1)
+            {
+                if (classes[classnum] < lowestLevelToUse)
+                    lowestLevelToUse = classes[classnum];
+
+                return lowestLevelToUse;
+            }
+
+            lowestLevelToUse = 70;
+            for (int eqclass = 1; eqclass <= 16; eqclass++)
+            {
+                if (classes[eqclass] < lowestLevelToUse)
+                    lowestLevelToUse = classes[eqclass];
+            }
+
+            return lowestLevelToUse;
+        }
+
         // checked this against the titanium client and validated that it produces the same output for all formulas/durations/levels 20250913
         public static int CalcBuffDuration_formula(int level, int formula, int duration)
         {
@@ -443,17 +463,18 @@ namespace Evie
             int buff_duration_formula = EQSpell.ConvertToInt32(buffdurationformula);
             int buff_duration = EQSpell.ConvertToInt32(buffduration);
 
-            // Summon item can use formulas but in a differen way
+            // Summon item can use formulas to calculate quantity but in a different way
             if (effect_id == (int)EQSpellEffectEnum.SummonItem || effect_id == (int)EQSpellEffectEnum.SummonItemIntoBag)
             {
                 if (formula < 100) return formula;
+                if (formula == 100) return 1; // i think this is always 1? not sure
                 base_value = 0;
                 max_value = 0;
             }
 
             int val = CalcSpellEffectValue_formula(effect_id, formula, base_value, max_value, buff_duration_formula, buff_duration, level, ticsremaining, cur_hp, max_hp, randomhigh);
 
-            // Summon item can use formulas but in a differen way
+            // Summon item can use formulas to calculate quantity but in a different way
             if (effect_id == (int)EQSpellEffectEnum.SummonItem || effect_id == (int)EQSpellEffectEnum.SummonItemIntoBag)
             {
                 if (formula >= 100)

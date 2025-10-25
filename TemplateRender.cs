@@ -1,9 +1,7 @@
 ﻿using Evie.Template;
-using Evie.Titanium;
 using RazorLight;
 using System;
 using System.Collections.Concurrent;
-using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -144,5 +142,6 @@ namespace Evie
     public class TemplateRenderContext
     {
         public EQSpell[] SpellFileRecords { get; set; }
+        public EQStringDB EQStringDB { get; set; }
     }
 }

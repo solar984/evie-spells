@@ -1,7 +1,6 @@
 ﻿using Evie.Titanium;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace Evie.Template
@@ -12,7 +11,7 @@ namespace Evie.Template
         {
             ClassName = EQClass.Classes.First(c => c.ShortName == eqclass).LongName;
 
-            for (int level = 1; level <= 70; level++)
+            for (int level = 1; level <= 254; level++)
             {
                 List<EQSpell> spells = new List<EQSpell>();
 
