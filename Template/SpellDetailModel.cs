@@ -779,6 +779,12 @@ namespace Evie.Template
                     return "Movement Speed";
                 case (int)EQSpellEffectEnum.ChangeAggro:
                     return "Hate Modifier";
+                case (int)EQSpellEffectEnum.ChangeFrenzyRad:
+                    return "NPC Aggro Radius ";
+                case (int)EQSpellEffectEnum.Harmony:
+                    return "NPC Assist Radius ";
+                case (int)EQSpellEffectEnum.Lull:
+                    return "Pacify";
             }
 
             return Enum.GetName(typeof(EQSpellEffectEnum), effect);
@@ -840,6 +846,12 @@ namespace Evie.Template
                     {
                         string summon_qty_str = value_range != "1" ? String.Format(" x {0}", value_range) : "";
                         return String.Format("{0}: <a href=\"http://lucy.allakhazam.com/item.html?id={1}\">{1}</a>{2}", EffectName(spell.effect[slot]), base1, summon_qty_str);
+                    }
+                case (int)EQSpellEffectEnum.ChangeFrenzyRad:
+                case (int)EQSpellEffectEnum.Harmony:
+                    {
+                        string levelLimit = spell.max[slot] != 0 ? String.Format(" up to level {0}", spell.max[slot]) : "";
+                        return String.Format("{0} {1}{2}", EffectName(spell.effect[slot]), value_range, levelLimit);
                     }
                 case (int)EQSpellEffectEnum.Fear:
                     {

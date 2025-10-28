@@ -454,7 +454,7 @@ namespace Evie
             return temp;
         }
 
-        public int CalcSpellEffectValue(int effect_slot, int level = 70, int ticsremaining = 0, int cur_hp = 1, int max_hp = 100, int randomhigh = 1)
+        public int CalcSpellEffectValue(int effect_slot, int caster_level = 70, int ticsremaining = 0, int cur_hp = 1, int max_hp = 100, int randomhigh = 1)
         {
             int effect_id = effect[effect_slot];
             int formula = calc[effect_slot];
@@ -472,7 +472,7 @@ namespace Evie
                 max_value = 0;
             }
 
-            int val = CalcSpellEffectValue_formula(effect_id, formula, base_value, max_value, buff_duration_formula, buff_duration, level, ticsremaining, cur_hp, max_hp, randomhigh);
+            int effect_value = CalcSpellEffectValue_formula(effect_id, formula, base_value, max_value, buff_duration_formula, buff_duration, caster_level, ticsremaining, cur_hp, max_hp, randomhigh);
 
             // Summon item can use formulas to calculate quantity but in a different way
             if (effect_id == (int)EQSpellEffectEnum.SummonItem || effect_id == (int)EQSpellEffectEnum.SummonItemIntoBag)
@@ -483,16 +483,47 @@ namespace Evie
                     int min_qty = max[effect_slot];
                     if (min_qty == 0) min_qty = stacksize;
 
-                    if (val < min_qty)
-                        val = min_qty;
-                    if (val < 1)
-                        val = 1;
+                    if (effect_value < min_qty)
+                        effect_value = min_qty;
+                    if (effect_value < 1)
+                        effect_value = 1;
 
-                    if (val > stacksize) val = stacksize;
+                    if (effect_value > stacksize) effect_value = stacksize;
                 }
             }
 
-            return val;
+            // some spell specific bonuses
+            int spell_id = ConvertToInt32(id);
+            if (spell_id == 88 /* Harm Touch */ || spell_id == 2774 /* Harmful Touch */)
+            {
+                if (caster_level > 40)
+                {
+                    int bonus = (caster_level - 40) * 20;
+                    bonus = Math.Clamp(bonus, 0, 500); // caps at level 65
+                    effect_value -= bonus;
+                }
+                // the AA Unholy Touch adds another 450 per rank
+            }
+            if (spell_id == 742 /* Denon`s Desperate Dirge */)
+            {
+                if (caster_level > 45)
+                {
+                    int bonus = (caster_level - 45) * 10;
+                    bonus = Math.Clamp(bonus, 0, 200); // caps at level 65
+                    effect_value -= bonus;
+                }
+            }
+            if (spell_id == 87 /* Lay on Hands */)
+            {
+                if (caster_level > 40)
+                {
+                    int bonus = (caster_level - 40) * 44;
+                    if (bonus > 0)
+                        effect_value += bonus;
+                }
+            }
+
+            return effect_value;
         }
 
         public static int CalcSpellEffectValue_formula(int effect_id, int formula, int base_value, int max_value, int buff_duration_formula, int buff_duration, int level, int ticsremaining, int cur_hp, int max_hp, int randomhigh)

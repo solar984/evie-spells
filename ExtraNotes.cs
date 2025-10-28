@@ -24,6 +24,24 @@ namespace Evie
             ([
                 new ExtraNotes()
                 {
+                    Name = "Harm Touch",
+                    Predicate = s => new[] { 88, 2774 }.Contains( EQSpell.ConvertToInt32(s.id)),
+                    Content = "Spells <a href=\"88.html\">Harm Touch</a> and <a href=\"2774.html\">Harmful Touch</a> receive a bonus if the caster is above level 40:<br /><code>(caster_level - 40) * 20</code><br />The bonus is capped at 500 (maxed at level 65) and is already included in the calculation on this page."
+                },
+                new ExtraNotes()
+                {
+                    Name = "Denon`s Desperate Dirge",
+                    Predicate = s => new[] { 742 }.Contains( EQSpell.ConvertToInt32(s.id)),
+                    Content = "Spell <a href=\"742.html\">Denon`s Desperate Dirge</a> receives a bonus if the caster is above level 45:<br /><code>(caster_level - 45) * 10</code><br />The bonus is capped at 200 (maxed at level 65) and is already included in the calculation on this page."
+                },
+                new ExtraNotes()
+                {
+                    Name = "Lay on Hands",
+                    Predicate = s => new[] { 87 }.Contains( EQSpell.ConvertToInt32(s.id)),
+                    Content = "Spell <a href=\"87.html\">Lay on Hands</a> receives a bonus if the caster is above level 40:<br /><code>(caster_level - 40) * 44</code><br />The bonus is already included in the calculation on this page."
+                },
+                new ExtraNotes()
+                {
                     Name = "Stun",
                     Predicate = (s) =>
                     {
