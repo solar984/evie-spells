@@ -792,20 +792,11 @@ namespace Evie.Template
                 o.ScaleFactor[0], o.ScaleFactor[1], o.ScaleFactor[2], o.ScaleFactor[3], o.ScaleFactor[4], o.ScaleFactor[5],
                 o.ScaleFactor[6], o.ScaleFactor[7], o.ScaleFactor[8], o.ScaleFactor[9], o.ScaleFactor[10], o.ScaleFactor[11]);
 
-            for (int i = 0; i < 12; i++)
-            {
-                if (o.ScaleFactor[i] != 0)
-                {
-                    Console.Write("");
-                }
-            }
-
             return sb.ToString();
         }
 
         public string FormatOldSpellEffectData()
         {
-            //int indent = 0;
             string indentString = "    ";
             StringBuilder sb = new StringBuilder();
 
@@ -821,6 +812,58 @@ namespace Evie.Template
             }
 
             return sb.ToString();
+        }
+
+        public string FormatNewSpellEffectData_Stage(StageTypeNew o, string indentString)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendFormat("{0}SoundNum: {2}{1}", indentString, Environment.NewLine, o.SoundNum);
+            for (int i = 0; i < 4; i++)
+            {
+                var e = o.Emitters[i];
+                sb.AppendFormat("{0}{2}{1}", indentString, Environment.NewLine, i);
+                sb.AppendFormat("{0}{0}EmitterType: {2}{1}", indentString, Environment.NewLine, e.EmitterType);
+                sb.AppendFormat("{0}{0}MinLevel: {2}{1}", indentString, Environment.NewLine, e.MinLevel);
+                sb.AppendFormat("{0}{0}AttachType: {2}{1}", indentString, Environment.NewLine, e.AttachType);
+                sb.AppendFormat("{0}{0}DAGnum: {2}{1}", indentString, Environment.NewLine, e.DAGnum);
+            }
+
+            return sb.ToString();
+        }
+
+        public string FormatNewSpellEffectData()
+        {
+            string indentString = "    ";
+            StringBuilder sb = new StringBuilder();
+
+            //for (int spaix = 0; spaix < Context.NewSpellEffects.Length; spaix++)
+            {
+                int spaix = EQSpell.ConvertToInt32(spell.spellanim);
+                if (spaix >= 0 && spaix < Context.NewSpellEffects.Length)
+                {
+                    var spellEffect = Context.NewSpellEffects[spaix];
+                    sb.AppendFormat("{0} {1}{2}", spaix, spellEffect.Name, Environment.NewLine);
+
+                    for (int stage = 0; stage < 3; stage++)
+                    {
+                        sb.AppendFormat("{0}{1}{2}", stage, Environment.NewLine, FormatNewSpellEffectData_Stage(spellEffect.Stage[stage], indentString));
+                    }
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public string FormatNewSpellEffectName()
+        {
+            int spaix = EQSpell.ConvertToInt32(spell.spellanim);
+            if (spaix >= 0 && spaix < Context.NewSpellEffects.Length)
+            {
+                return String.Format("{0} {1}", spaix, Context.NewSpellEffects[spaix].Name);
+            }
+
+            return spell.spellanim;
         }
 
         public string EffectName(int effect)

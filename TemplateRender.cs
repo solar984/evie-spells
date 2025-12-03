@@ -144,5 +144,6 @@ namespace Evie
         public EQSpell[] SpellFileRecords { get; set; }
         public EQStringDB EQStringDB { get; set; }
         public SpellEffectOld[] OldSpellEffects { get; set; }
+        public SpellEffectNew[] NewSpellEffects { get; set; }
     }
 }

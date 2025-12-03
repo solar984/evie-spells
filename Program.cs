@@ -21,12 +21,22 @@ namespace Evie
                 SpellEffectOld[] oldSpellEffects = EQSpellEffectsOld.ReadFile("Titanium/spells.eff");
                 Console.WriteLine("Read {0} old spell effect records.", oldSpellEffects.Length);
 
+                // load spell effects (new)
+                SpellEffectNew[] newSpellEffects = EQSpellEffectsNew.ReadFile("Titanium/spellsnew.eff");
+                Console.WriteLine("Read {0} new spell effect records.", newSpellEffects.Length);
+
                 // load dbstr
                 EQStringDB dbstr = new EQStringDB("Titanium/dbstr_us.txt");
                 Console.WriteLine("Read {0} string database records.", dbstr.Count);
 
                 // generate the static website pages
-                new TemplateRender().RenderAll(new TemplateRenderContext() { SpellFileRecords = spellRecords, EQStringDB = dbstr, OldSpellEffects = oldSpellEffects });
+                new TemplateRender().RenderAll(new TemplateRenderContext()
+                {
+                    SpellFileRecords = spellRecords,
+                    EQStringDB = dbstr,
+                    OldSpellEffects = oldSpellEffects,
+                    NewSpellEffects = newSpellEffects
+                });
             }
             catch (Exception ex)
             {
