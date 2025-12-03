@@ -17,12 +17,16 @@ namespace Evie
                 EQSpell[] spellRecords = new SpellFileReader().ReadSpellFileRecords(spells_en_titanium);
                 Console.WriteLine("Read {0} spell records.", spellRecords.Length);
 
+                // load spell effects (old)
+                SpellEffectOld[] oldSpellEffects = EQSpellEffectsOld.ReadFile("Titanium/spells.eff");
+                Console.WriteLine("Read {0} old spell effect records.", oldSpellEffects.Length);
+
                 // load dbstr
                 EQStringDB dbstr = new EQStringDB("Titanium/dbstr_us.txt");
                 Console.WriteLine("Read {0} string database records.", dbstr.Count);
 
                 // generate the static website pages
-                new TemplateRender().RenderAll(new TemplateRenderContext() { SpellFileRecords = spellRecords, EQStringDB = dbstr });
+                new TemplateRender().RenderAll(new TemplateRenderContext() { SpellFileRecords = spellRecords, EQStringDB = dbstr, OldSpellEffects = oldSpellEffects });
             }
             catch (Exception ex)
             {

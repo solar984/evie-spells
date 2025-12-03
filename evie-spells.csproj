@@ -8,6 +8,7 @@
 		<Nullable>disable</Nullable>
 		<ErrorReport>none</ErrorReport>
 		<PreserveCompilationContext>true</PreserveCompilationContext>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -72,6 +73,9 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Titanium\dbstr_us.txt">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Titanium\spells.eff">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>

@@ -157,6 +157,20 @@
 	</table>
 	<br />
 	<br />
+	<table>
+		<tr><td class="label">Spell Effect Graphics (new)</td><td class="value">@(EQSpell.ConvertToInt32(Model.spell.spellanim))</td></tr>
+		<tr>
+			<td class="label">Spell Effect Graphics (old)</td>
+			<td class="value">
+				<details>
+					<summary><span>@(EQSpell.ConvertToInt32(Model.spell.SpellAffectIndex))</span></summary>
+					<pre>@Model.FormatOldSpellEffectData()</pre>
+				</details>
+			</td>
+		</tr>
+	</table>
+	<br />
+	<br />
 	<details>
 		<summary><span>Raw spell data</span></summary>
 		<pre>@Model.spell.RawDataString()</pre>

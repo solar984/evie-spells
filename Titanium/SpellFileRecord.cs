@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -500,6 +501,7 @@ namespace Evie.Titanium
         public string TravelType { get; set; }
 
         // 123 SpellAffectIndex
+        [Description("This is the 'old' spell effect.")]
         [Column("SpellAffectIndex", Order = 123)]
         public string SpellAffectIndex { get; set; }
 
@@ -588,6 +590,7 @@ namespace Evie.Titanium
         public string new_icon { get; set; }
 
         // 145 spellanim
+        [Description("This is the 'new' spell effect.")]
         [Column("spellanim", Order = 145)]
         public string spellanim { get; set; }
 
@@ -970,13 +973,15 @@ namespace Evie.Titanium
             foreach (var p in typeof(SpellFileRecord).GetProperties())
             {
                 var ca = p.GetCustomAttributes(true).Where(a => a.GetType().Name == "ColumnAttribute").FirstOrDefault() as ColumnAttribute;
+                var desc = p.GetCustomAttributes(true).Where(a => a.GetType().Name == "DescriptionAttribute").FirstOrDefault() as DescriptionAttribute;
                 if (ca != null)
                 {
                     int fieldNumber = ca.Order;
                     string fieldName = ca.Name;
                     object fieldValue = p.GetValue(this);
+                    string descStr = desc != null ? desc.Description : "";
 
-                    sb.AppendLine(String.Format("{0}{2,4}{0}{1,27}:{0}{3}", indent, fieldName, fieldNumber, fieldValue));
+                    sb.AppendLine(String.Format("{0}{2,4}{0}{1,27}:{0}{3}{0}{4}", indent, fieldName, fieldNumber, fieldValue, descStr));
                 }
             }
 

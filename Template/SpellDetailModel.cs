@@ -731,6 +731,98 @@ namespace Evie.Template
             return sb.ToString();
         }
 
+        public string FormatOldSpellEffectData_Stage(StageType o, string indentString)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendFormat("{0}AttachTag: {2}{1}", indentString, Environment.NewLine, o.AttachTag);
+            sb.AppendFormat("{0}BlitSprite: {2} {3} {4}{1}", indentString, Environment.NewLine, o.BlitSprite[0].Value, o.BlitSprite[1].Value, o.BlitSprite[2].Value);
+            sb.AppendFormat("{0}DAGnum: {2} {3} {4}{1}", indentString, Environment.NewLine, o.DAGnum[0], o.DAGnum[1], o.DAGnum[2]);
+            sb.AppendFormat("{0}pcloud: {2} {3} {4}{1}", indentString, Environment.NewLine, o.pcloud[0], o.pcloud[1], o.pcloud[2]);
+            sb.AppendFormat("{0}SpriteEffect: {2}{1}", indentString, Environment.NewLine, o.SpriteEffect);
+            sb.AppendFormat("{0}SoundNum: {2}{1}", indentString, Environment.NewLine, o.SoundNum);
+            sb.AppendFormat("{0}Tint: {2} {3} {4}{1}", indentString, Environment.NewLine, String.Format("#{0:X8}", o.Tint[0]), String.Format("#{0:X8}", o.Tint[1]), String.Format("#{0:X8}", o.Tint[2]));
+            sb.AppendFormat("{0}Gravity: {2} {3} {4}{1}", indentString, Environment.NewLine, o.Gravity[0], o.Gravity[1], o.Gravity[2]);
+            sb.AppendFormat("{0}NormalXYZ: {2},{3},{4} {5},{6},{7} {8},{9},{10}{1}", indentString, Environment.NewLine,
+                o.NormalXYZ[0], o.NormalXYZ[1], o.NormalXYZ[2],
+                o.NormalXYZ[3], o.NormalXYZ[4], o.NormalXYZ[5],
+                o.NormalXYZ[6], o.NormalXYZ[7], o.NormalXYZ[8]);
+            sb.AppendFormat("{0}Radius: {2} {3} {4}{1}", indentString, Environment.NewLine, o.Radius[0], o.Radius[1], o.Radius[2]);
+            sb.AppendFormat("{0}Angle: {2} {3} {4}{1}", indentString, Environment.NewLine, o.Angle[0], o.Angle[1], o.Angle[2]);
+            sb.AppendFormat("{0}Lifespan: {2} {3} {4}{1}", indentString, Environment.NewLine, o.Lifespan[0], o.Lifespan[1], o.Lifespan[2]);
+            sb.AppendFormat("{0}Velocity: {2} {3} {4}{1}", indentString, Environment.NewLine, o.Velocity[0], o.Velocity[1], o.Velocity[2]);
+            sb.AppendFormat("{0}Rate: {2} {3} {4}{1}", indentString, Environment.NewLine, o.Rate[0], o.Rate[1], o.Rate[2]);
+            sb.AppendFormat("{0}Scale: {2} {3} {4}{1}", indentString, Environment.NewLine, o.Scale[0], o.Scale[1], o.Scale[2]);
+
+            sb.AppendFormat("{0}SpriteTAG: {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}{1}", indentString, Environment.NewLine,
+                o.SpriteTAG[0].Value, o.SpriteTAG[1].Value, o.SpriteTAG[2].Value, o.SpriteTAG[3].Value, o.SpriteTAG[4].Value, o.SpriteTAG[5].Value,
+                o.SpriteTAG[6].Value, o.SpriteTAG[7].Value, o.SpriteTAG[8].Value, o.SpriteTAG[9].Value, o.SpriteTAG[10].Value, o.SpriteTAG[11].Value);
+            // these SpriteRGB values are always 0
+            /*
+            sb.AppendFormat("{0}SpriteRGB: {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}{1}", indentString, Environment.NewLine,
+                String.Format("#{0:X6}", o.SpriteRGB[0].Red << 16 & o.SpriteRGB[0].Green << 8 & o.SpriteRGB[0].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[1].Red << 16 & o.SpriteRGB[1].Green << 8 & o.SpriteRGB[1].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[2].Red << 16 & o.SpriteRGB[2].Green << 8 & o.SpriteRGB[2].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[3].Red << 16 & o.SpriteRGB[3].Green << 8 & o.SpriteRGB[3].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[4].Red << 16 & o.SpriteRGB[4].Green << 8 & o.SpriteRGB[4].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[5].Red << 16 & o.SpriteRGB[5].Green << 8 & o.SpriteRGB[5].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[6].Red << 16 & o.SpriteRGB[6].Green << 8 & o.SpriteRGB[6].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[7].Red << 16 & o.SpriteRGB[7].Green << 8 & o.SpriteRGB[7].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[8].Red << 16 & o.SpriteRGB[8].Green << 8 & o.SpriteRGB[8].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[9].Red << 16 & o.SpriteRGB[9].Green << 8 & o.SpriteRGB[9].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[10].Red << 16 & o.SpriteRGB[10].Green << 8 & o.SpriteRGB[10].Blue),
+                String.Format("#{0:X6}", o.SpriteRGB[11].Red << 16 & o.SpriteRGB[11].Green << 8 & o.SpriteRGB[11].Blue));
+            */
+            sb.AppendFormat("{0}RollRate: {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}{1}", indentString, Environment.NewLine,
+                o.RollRate[0], o.RollRate[1], o.RollRate[2], o.RollRate[3], o.RollRate[4], o.RollRate[5],
+                o.RollRate[6], o.RollRate[7], o.RollRate[8], o.RollRate[9], o.RollRate[10], o.RollRate[11]);
+            sb.AppendFormat("{0}HeadingOffset: {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}{1}", indentString, Environment.NewLine,
+                o.HeadingOffset[0], o.HeadingOffset[1], o.HeadingOffset[2], o.HeadingOffset[3], o.HeadingOffset[4], o.HeadingOffset[5],
+                o.HeadingOffset[6], o.HeadingOffset[7], o.HeadingOffset[8], o.HeadingOffset[9], o.HeadingOffset[10], o.HeadingOffset[11]);
+            sb.AppendFormat("{0}PitchOffset: {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}{1}", indentString, Environment.NewLine,
+                o.PitchOffset[0], o.PitchOffset[1], o.PitchOffset[2], o.PitchOffset[3], o.PitchOffset[4], o.PitchOffset[5],
+                o.PitchOffset[6], o.PitchOffset[7], o.PitchOffset[8], o.PitchOffset[9], o.PitchOffset[10], o.PitchOffset[11]);
+            sb.AppendFormat("{0}Distance: {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}{1}", indentString, Environment.NewLine,
+                o.Distance[0], o.Distance[1], o.Distance[2], o.Distance[3], o.Distance[4], o.Distance[5],
+                o.Distance[6], o.Distance[7], o.Distance[8], o.Distance[9], o.Distance[10], o.Distance[11]);
+            sb.AppendFormat("{0}EffectType: {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}{1}", indentString, Environment.NewLine,
+                o.EffectType[0], o.EffectType[1], o.EffectType[2], o.EffectType[3], o.EffectType[4], o.EffectType[5],
+                o.EffectType[6], o.EffectType[7], o.EffectType[8], o.EffectType[9], o.EffectType[10], o.EffectType[11]);
+            sb.AppendFormat("{0}ScaleFactor: {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}{1}", indentString, Environment.NewLine,
+                o.ScaleFactor[0], o.ScaleFactor[1], o.ScaleFactor[2], o.ScaleFactor[3], o.ScaleFactor[4], o.ScaleFactor[5],
+                o.ScaleFactor[6], o.ScaleFactor[7], o.ScaleFactor[8], o.ScaleFactor[9], o.ScaleFactor[10], o.ScaleFactor[11]);
+
+            for (int i = 0; i < 12; i++)
+            {
+                if (o.ScaleFactor[i] != 0)
+                {
+                    Console.Write("");
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public string FormatOldSpellEffectData()
+        {
+            //int indent = 0;
+            string indentString = "    ";
+            StringBuilder sb = new StringBuilder();
+
+            int spaix = EQSpell.ConvertToInt32(spell.SpellAffectIndex);
+            if (spaix >= 0 && spaix <= 255)
+            {
+                var spellEffect = Context.OldSpellEffects[spaix];
+
+                for (int stage = 0; stage < 3; stage++)
+                {
+                    sb.AppendFormat("{0}{1}{2}", stage, Environment.NewLine, FormatOldSpellEffectData_Stage(spellEffect.types[stage], indentString));
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public string EffectName(int effect)
         {
             switch (effect)

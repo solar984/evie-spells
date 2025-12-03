@@ -88,6 +88,26 @@ namespace Evie
                         sb.AppendFormat("{0}}}", indent);
                     }
                 }
+                else if (t.IsValueType && !t.IsPrimitive && !t.IsEnum) // struct
+                {
+                    if (t != typeof(string) && t.GetFields().Length > 0)
+                    {
+                        sb.AppendFormat("{1}{0}{2}{{{0}", Environment.NewLine, o.GetType().Name, indent);
+
+                        foreach (FieldInfo pi in o.GetType().GetFields())
+                        {
+                            string propName = pi.Name;
+                            string typeDesc = pi.FieldType.Name;
+                            object value = pi.GetValue(o);
+                            sb.AppendFormat("{0}{1} ({2}):  ", indentPlus, propName, typeDesc);
+
+                            string valueStr = ObjectToString(value, indentLevel + 1, stack);
+                            sb.AppendFormat("{0}", valueStr);
+                        }
+
+                        sb.AppendFormat("{0}}}", indent);
+                    }
+                }
                 else
                 {
                     sb.Append(o.ToString());
