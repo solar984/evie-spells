@@ -175,11 +175,11 @@
 					<tr>
 						<td class="label">Spell Effect Sound (new) - Caster</td>
 						<td class="value">
-							<div>@Model.GetAudioFileNumber(Evie.Template.SpellDetailModel.AudioFileType.NewEffectCaster) - <a href="wav/@wav">@wav</a></div>
+							<div>@Model.GetAudioFileNumber(Evie.Template.SpellDetailModel.AudioFileType.NewEffectCaster) - <a href="wav/@wav.ToLower()">@wav</a></div>
 						</td>
 						<td class="value">
 							<audio controls>
-								<source src="wav/@wav" type="audio/wav">
+								<source src="wav/@wav.ToLower()" type="audio/wav">
 								Your browser does not support the audio element.
 							</audio>
 						</td>
@@ -193,11 +193,11 @@
 					<tr>
 						<td class="label">Spell Effect Sound (new) - Target</td>
 						<td class="value">
-							<div>@Model.GetAudioFileNumber(Evie.Template.SpellDetailModel.AudioFileType.NewEffectTarget) - <a href="wav/@wav">@wav</a></div>
+							<div>@Model.GetAudioFileNumber(Evie.Template.SpellDetailModel.AudioFileType.NewEffectTarget) - <a href="wav/@wav.ToLower()">@wav</a></div>
 						</td>
 						<td class="value">
 							<audio controls>
-								<source src="wav/@wav" type="audio/wav">
+								<source src="wav/@wav.ToLower()" type="audio/wav">
 								Your browser does not support the audio element.
 							</audio>
 						</td>
@@ -223,11 +223,11 @@
 					<tr>
 						<td class="label">Spell Effect Sound (old) - Caster</td>
 						<td class="value">
-							<div>@Model.GetAudioFileNumber(Evie.Template.SpellDetailModel.AudioFileType.OldEffectCaster) - <a href="wav/@wav">@wav</a></div>
+							<div>@Model.GetAudioFileNumber(Evie.Template.SpellDetailModel.AudioFileType.OldEffectCaster) - <a href="wav/@wav.ToLower()">@wav</a></div>
 						</td>
 						<td class="value">
 							<audio controls>
-								<source src="wav/@wav" type="audio/wav">
+								<source src="wav/@wav.ToLower()" type="audio/wav">
 								Your browser does not support the audio element.
 							</audio>
 						</td>
@@ -241,11 +241,11 @@
 					<tr>
 						<td class="label">Spell Effect Sound (old) - Target</td>
 						<td class="value">
-							<div>@Model.GetAudioFileNumber(Evie.Template.SpellDetailModel.AudioFileType.OldEffectTarget) - <a href="wav/@wav">@wav</a></div>
+							<div>@Model.GetAudioFileNumber(Evie.Template.SpellDetailModel.AudioFileType.OldEffectTarget) - <a href="wav/@wav.ToLower()">@wav</a></div>
 						</td>
 						<td class="value">
 							<audio controls>
-								<source src="wav/@wav" type="audio/wav">
+								<source src="wav/@wav.ToLower()" type="audio/wav">
 								Your browser does not support the audio element.
 							</audio>
 						</td>
