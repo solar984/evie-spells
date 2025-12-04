@@ -1,0 +1,3 @@
+[Thu Sep 02 18:22:35 2004]00000:<verify> Line 204, C:\EverQuest\ffcreate2\ffcreate2\ffcreate2.cpp:
+
+Error - no files were added to ..\snd2.pfs

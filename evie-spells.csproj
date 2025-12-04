@@ -86,4 +86,14 @@
 	  </None>
 	</ItemGroup>
 
+	<!-- copy wav files to www directory -->
+	<ItemGroup>
+		<WavFiles Include="Titanium\wav\**\*.wav" />
+	</ItemGroup>
+	<Target Name="CopyWavFiles" AfterTargets="Build">
+		<Copy
+			SourceFiles="@(WavFiles)"
+			DestinationFolder="$(OutDir)\www\wav"
+			SkipUnchangedFiles="true" />
+	</Target>
 </Project>

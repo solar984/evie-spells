@@ -866,6 +866,53 @@ namespace Evie.Template
             return spell.spellanim;
         }
 
+        public enum AudioFileType : int
+        {
+            NewEffectCaster,
+            NewEffectTarget,
+            OldEffectCaster,
+            OldEffectTarget,
+        };
+        public int GetAudioFileNumber(AudioFileType type)
+        {
+            int old_effect_ix = EQSpell.ConvertToInt32(spell.SpellAffectIndex);
+            int new_effect_ix = EQSpell.ConvertToInt32(spell.spellanim);
+            int soundnum = -1;
+
+            switch (type)
+            {
+                case AudioFileType.NewEffectCaster:
+                case AudioFileType.NewEffectTarget:
+                    if (new_effect_ix >= 0 && new_effect_ix < Context.NewSpellEffects.Length)
+                    {
+                        int stage = type == AudioFileType.NewEffectTarget ? 2 : 0;
+                        soundnum = Context.NewSpellEffects[new_effect_ix].Stage[stage].SoundNum;
+                    }
+                    break;
+                case AudioFileType.OldEffectCaster:
+                case AudioFileType.OldEffectTarget:
+                    if (old_effect_ix >= 0 && old_effect_ix <= Context.OldSpellEffects.Length)
+                    {
+                        int stage = type == AudioFileType.OldEffectTarget ? 2 : 0;
+                        soundnum = Context.OldSpellEffects[old_effect_ix].types[stage].SoundNum;
+                    }
+                    break;
+            }
+
+            return soundnum;
+        }
+        public string GetAudioFileName(AudioFileType type)
+        {
+            int soundnum = GetAudioFileNumber(type); ;
+
+            if (soundnum >= 0 && EQSounds.SoundNumberToFileNameMap.ContainsKey(soundnum))
+            {
+                return EQSounds.SoundNumberToFileNameMap[soundnum];
+            }
+
+            return null;
+        }
+
         public string EffectName(int effect)
         {
             switch (effect)

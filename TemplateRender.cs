@@ -92,6 +92,9 @@ namespace Evie
             // icons
             File.Delete(Path.Combine(outputDirectory, "icons.css")); // this is just for including in the spell detail page
             CopyDirectory("Icons", Path.Combine("www", "icons"));
+
+            // wavs are copied with an MSBuild task in the csproj
+            //CopyDirectory("Titanium/wav", Path.Combine("www", "wav"));
         }
 
         public static void CopyDirectory(string sourceDirectory, string targetDirectory)
